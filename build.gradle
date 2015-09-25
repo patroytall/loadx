@@ -1,0 +1,13 @@
+apply plugin: 'java'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    // compile 'org.slf4j:slf4j-api:1.7.12'
+	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.1'
+	compile group: 'javax.websocket', name: 'javax.websocket-api', version: '1.1'
+ 	compile group: 'org.glassfish.tyrus', name: 'tyrus-container-jdk-client', version: '1.8.3'
+    testCompile 'junit:junit:4.12'
+}
