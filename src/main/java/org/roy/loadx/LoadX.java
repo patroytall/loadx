@@ -24,8 +24,8 @@ import org.apache.http.util.EntityUtils;
  * - configure monitor to list on port 1234 and forward to balancer01.qa01.cenx.localnet
  */
 public class LoadX {
-	private static final String BASE_URL = "http://localhost.qa01.cenx.localnet:1234/"; // or "http://balancer01-s02.cenx.localnet/"
-//	private static final String BASE_URL = "http://balancer01.qa01.cenx.localnet/";
+//	private static final String BASE_URL = "http://localhost.qa01.cenx.localnet:1234/"; // or "http://balancer01-s02.cenx.localnet/"
+	private static final String BASE_URL = "http://balancer01.qa01.cenx.localnet/";
 		
 	private static final String HTML_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
 	private static final String EDN_ACCEPT = "application/vnd.cenx.services.v1+edn;charset=UTF-8";

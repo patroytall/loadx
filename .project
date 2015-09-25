@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>LoadX</name>
-	<comment>Project LoadX created by Buildship.</comment>
+	<name>loadx</name>
+	<comment>Project loadx created by Buildship.</comment>
 	<projects>
 	</projects>
 	<buildSpec>
@@ -22,7 +22,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1442423243970</id>
+			<id>1443188768387</id>
 			<name></name>
 			<type>26</type>
 			<matcher>
@@ -31,7 +31,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1442423243971</id>
+			<id>1443188768388</id>
 			<name></name>
 			<type>26</type>
 			<matcher>
