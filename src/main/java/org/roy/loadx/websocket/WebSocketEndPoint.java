@@ -1,4 +1,4 @@
-package org.roy.loadx;
+package org.roy.loadx.websocket;
 
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;

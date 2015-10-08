@@ -1,4 +1,4 @@
-package org.roy.loadx;
+package org.roy.loadx.websocket;
 
 import java.io.IOException;
 import java.net.URI;

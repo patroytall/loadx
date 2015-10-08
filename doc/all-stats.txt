@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# stop on errors
+set -e
+
+pidfile="/cenx/tmp/status/all-stats.lck"
+
+# lock it
+exec 200>$pidfile
+flock -n 200 || exit 1
+pid=$$
+echo $pid 1>&200
+
+
+echo `date`
+echo "Apollo1"
+curl -m 20 -silent http://10.70.19.99:8080/api/status | gawk -F'5000,' '{print  substr($2,0,67)}' | sed '/^$/d'
+ssh -q 10.70.19.99 w | grep "load average"
+CPU=`ssh -q 10.70.19.99 mpstat 1 1 | tail -1 | gawk '{print 100 - $11"%"}'`
+echo "CPU Usage: ${CPU}"
+echo "Wildfly api apollo.war"
+curl -m 20 -silent --digest 'http://admin:admin@10.70.19.111:9990/management' --header "Content-Type: application/json" -d '{"operation":"read-resource","recursive":"true","include-runtime":"true","address":[{"host":"10.70.19.99"},{"server":"10.70.19.99-0"},{"deployment":"apollo.war"},{"subsystem":"undertow"}], "json.pretty":1}' | grep 'active'
+echo "Wildfly api bifrost.war"
+curl -m 20 --silent --digest 'http://admin:admin@10.70.19.111:9990/management' --header "Content-Type: application/json" -d '{"operation":"read-resource","recursive":"true","include-runtime":"true","address":[{"host":"10.70.19.99"},{"server":"10.70.19.99-0"},{"deployment":"bifrost.war"},{"subsystem":"undertow"}], "json.pretty":1}' | grep 'active'
+echo "Wildfly JVM Heap Usage"
+docker run --rm -v `pwd`:/transport -e DC_PORT_9990_TCP_ADDR=10.70.19.111 docker.cenx.localnet:5000/wildfly-cli --timeout=1000 --command="/host=10.70.19.99/server=10.70.19.99-0/core-service=platform-mbean/type=memory :read-attribute(name=heap-memory-usage)"  | egrep "used|committed" | sed 's/L,//g' | awk '{ foo = $3 / 1024 / 1024 ; print $1" "$2" "foo "MB" }'
+
+printf "\n";
+echo "Apollo2"
+curl -m 20 -silent http://10.70.19.100:8080/api/status | gawk -F'5000,' '{print  substr($2,0,67)}' | sed '/^$/d'
+ssh -q 10.70.19.100 w | grep "load average"
+CPU=`ssh -q 10.70.19.100 mpstat 1 1 | tail -1 | gawk '{print 100 - $11"%"}'`
+echo "CPU Usage: ${CPU}"
+echo "Wildfly api apollo.war"
+curl -m 20 --silent --digest 'http://admin:admin@10.70.19.111:9990/management' --header "Content-Type: application/json" -d '{"operation":"read-resource","recursive":"true","include-runtime":"true","address":[{"host":"10.70.19.100"},{"server":"10.70.19.100-0"},{"deployment":"apollo.war"},{"subsystem":"undertow"}], "json.pretty":1}' | grep 'active'
+echo "Wildfly api bifrost.war"
+curl -m 20 --silent --digest 'http://admin:admin@10.70.19.111:9990/management' --header "Content-Type: application/json" -d '{"operation":"read-resource","recursive":"true","include-runtime":"true","address":[{"host":"10.70.19.100"},{"server":"10.70.19.100-0"},{"deployment":"bifrost.war"},{"subsystem":"undertow"}], "json.pretty":1}' | grep 'active'
+echo "Wildfly JVM Heap Usage"
+docker run --rm -v `pwd`:/transport -e DC_PORT_9990_TCP_ADDR=10.70.19.111 docker.cenx.localnet:5000/wildfly-cli --timeout=1000 --command="/host=10.70.19.100/server=10.70.19.100-0/core-service=platform-mbean/type=memory :read-attribute(name=heap-memory-usage)" | egrep "used|committed" | sed 's/L,//g' | awk '{ foo = $3 / 1024 / 1024 ; print $1" "$2" "foo "MB" }'
+
+printf "\n";
+echo "Apollo3"
+curl -m 20 -silent http://10.70.19.101:8080/api/status | gawk -F'5000,' '{print  substr($2,0,67)}' | sed '/^$/d'
+ssh -q 10.70.19.101 w | grep "load average"
+CPU=`ssh -q 10.70.19.101 mpstat 1 1 | tail -1 | gawk '{print 100 - $11"%"}'`
+echo "CPU Usage: ${CPU}"
+echo "Wildfly api apollo.war"
+curl -m 20 --silent --digest 'http://admin:admin@10.70.19.111:9990/management' --header "Content-Type: application/json" -d '{"operation":"read-resource","recursive":"true","include-runtime":"true","address":[{"host":"10.70.19.101"},{"server":"10.70.19.101-0"},{"deployment":"apollo.war"},{"subsystem":"undertow"}], "json.pretty":1}' | grep 'active'
+echo "Wildfly api bifrost.war"
+curl -m 20 --silent --digest 'http://admin:admin@10.70.19.111:9990/management' --header "Content-Type: application/json" -d '{"operation":"read-resource","recursive":"true","include-runtime":"true","address":[{"host":"10.70.19.101"},{"server":"10.70.19.101-0"},{"deployment":"bifrost.war"},{"subsystem":"undertow"}], "json.pretty":1}' | grep 'active'
+echo "Wildfly JVM Heap Usage"
+docker run --rm -v `pwd`:/transport -e DC_PORT_9990_TCP_ADDR=10.70.19.111 docker.cenx.localnet:5000/wildfly-cli --timeout=1000 --command="/host=10.70.19.101/server=10.70.19.101-0/core-service=platform-mbean/type=memory :read-attribute(name=heap-memory-usage)" | egrep "used|committed" | sed 's/L,//g' | awk '{ foo = $3 / 1024 / 1024 ; print $1" "$2" "foo "MB" }'
+
+echo "Heimdallr m1_rate"
+ssh -q 10.70.19.112 tail -1 /cenx/logs/wildfly/wf-fault1/heimdallr/cenx.heimdallr.core.alarm-latency-and-rate.csv | gawk -F, '{print $14}'
