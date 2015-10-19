@@ -1,7 +1,9 @@
 package org.roy.loadx.api;
 
 public interface Scenario {
-	void start();
+	void initialize();
 
-	void stop();
+	void run();
+
+	void terminate();
 }

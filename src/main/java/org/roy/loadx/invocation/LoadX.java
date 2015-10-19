@@ -3,14 +3,17 @@ package org.roy.loadx.invocation;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.roy.loadx.api.Job;
-import org.roy.loadx.api.Scenario;
 import org.roy.loadx.job.JobImpl;
+import org.roy.loadx.job.ScenarioRunner;
 
 /**
  * To use Eclipse TCP/IP Monitor (domain set up required to support SSO): - configure /private/etc/hosts file with entry like: 127.0.0.1
@@ -18,13 +21,12 @@ import org.roy.loadx.job.JobImpl;
  * forward to balancer01.qa01.cenx.localnet
  */
 public class LoadX {
+	private static final int THREAD_COUNT = 1;
+
 	public static void main(String[] args) {
 		new LoadX().runJavaScript(args[0]);
 	}
 
-	/**
-	 * Packages can be references in bulk using "withnew JavaImport(); with
-	 */
 	private void runJavaScript(String resourcePath) {
 
 		ScriptEngineManager factory = new ScriptEngineManager();
@@ -33,6 +35,9 @@ public class LoadX {
 		String script;
 		try {
 			URL a = LoadX.class.getResource("/" + resourcePath);
+			if (a == null) {
+				throw new RuntimeException("invalid resource path: " + resourcePath);
+			}
 			script = new String(Files.readAllBytes(Paths.get(a.toURI())));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -57,9 +62,19 @@ public class LoadX {
 	}
 
 	private void runJob(Job job) {
-		Scenario scenario = job.getScenario();
-		scenario.start();
-		scenario.stop();
+		ExecutorService executorService = Executors.newFixedThreadPool(job.getScenarioUserCount());
+
+		for (int i = 0; i < job.getScenarioUserCount(); ++i) {
+			executorService.execute(new ScenarioRunner(job.getScenario(), job.getScenarioIterationCount()));
+		}
+
+		executorService.shutdown();
+
+		try {
+			executorService.awaitTermination(1, TimeUnit.DAYS);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 
 	}
 }

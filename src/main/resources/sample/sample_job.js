@@ -1,3 +1,4 @@
 with (new JavaImporter(org.roy.loadx.sample)) {
-	setScenario(new SampleScenario());
+	setScenarioIterationCount(2)
+	setScenario(new SampleScenario())
 }
