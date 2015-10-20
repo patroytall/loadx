@@ -10,9 +10,13 @@ public interface Job {
 
 	void setScenarioUserCount(int count);
 
+	void setJobInitializer(JobInitializer jobInitializer);
+
 	Scenario getScenario();
 
 	long getScenarioIterationCount();
 
 	int getScenarioUserCount();
+
+	ScenarioData getScenarioClassData(Object scenario);
 }

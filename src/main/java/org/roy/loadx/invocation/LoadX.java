@@ -11,7 +11,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import org.roy.loadx.api.Job;
+import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
 
@@ -21,8 +21,6 @@ import org.roy.loadx.job.ScenarioRunner;
  * forward to balancer01.qa01.cenx.localnet
  */
 public class LoadX {
-	private static final int THREAD_COUNT = 1;
-
 	public static void main(String[] args) {
 		new LoadX().runJavaScript(args[0]);
 	}
@@ -43,7 +41,7 @@ public class LoadX {
 			throw new RuntimeException(e);
 		}
 
-		Job job = new JobImpl();
+		JobImpl job = new JobImpl();
 
 		try {
 			Object global = engine.eval("this");
@@ -61,11 +59,27 @@ public class LoadX {
 		runJob(job);
 	}
 
-	private void runJob(Job job) {
-		ExecutorService executorService = Executors.newFixedThreadPool(job.getScenarioUserCount());
+	private void runJobIntialize(JobImpl jobImpl) {
+		JobInitializer jobInitializer = jobImpl.getJobInitializer();
+		if (jobInitializer != null) {
+			jobInitializer.initialize();
+		}
+	}
 
-		for (int i = 0; i < job.getScenarioUserCount(); ++i) {
-			executorService.execute(new ScenarioRunner(job.getScenario(), job.getScenarioIterationCount()));
+	private void runJobTerminate(JobImpl jobImpl) {
+		JobInitializer jobInitializer = jobImpl.getJobInitializer();
+		if (jobInitializer != null) {
+			jobInitializer.terminate();
+		}
+	}
+
+	private void runJob(JobImpl jobImpl) {
+		runJobIntialize(jobImpl);
+
+		ExecutorService executorService = Executors.newFixedThreadPool(jobImpl.getScenarioUserCount());
+
+		for (int i = 0; i < jobImpl.getScenarioUserCount(); ++i) {
+			executorService.execute(new ScenarioRunner(jobImpl.getScenario(), jobImpl.getScenarioIterationCount()));
 		}
 
 		executorService.shutdown();
@@ -76,5 +90,6 @@ public class LoadX {
 			throw new RuntimeException(e);
 		}
 
+		runJobTerminate(jobImpl);
 	}
 }
