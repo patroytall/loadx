@@ -11,44 +11,58 @@ import org.roy.loadx.api.ScenarioData;
 public class JobImpl implements Job {
 	private final Map<Object, ScenarioData> scenarioClassDataMap = new HashMap<>();
 
-	private Scenario scenario;
-	private long scenarioIterationCount = DEFAULT_SCENARIO_ITERATION_COUNT;
-	private int scenarioUserCount = DEFAULT_SCENARIO_USER_COUNT;
+	private Class<Scenario> scenarioClass;
+	private long defaultScenarioIterationCount = DEFAULT_SCENARIO_ITERATION_COUNT;
+	private long defaultScenarioRunIterationCount = DEFAULT_SCENARIO_RUN_ITERATION_COUNT;
+	private int defaultScenarioUserCount = DEFAULT_SCENARIO_USER_COUNT;
 	private JobInitializer jobInitializer;
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setScenario(Scenario scenario) {
-		this.scenario = scenario;
+	public void setScenario(Object scenarioClass) {
+		// Uses JDK internal class to allow Javascript job to pass scenario classes without .class suffix. Probably only works with Java 8
+		jdk.internal.dynalink.beans.StaticClass staticClass = (jdk.internal.dynalink.beans.StaticClass) scenarioClass;
+		this.scenarioClass = (Class<Scenario>) staticClass.getRepresentedClass();
 	}
 
 	@Override
-	public Scenario getScenario() {
-		return scenario;
+	public Class<Scenario> getScenarioClass() {
+		return scenarioClass;
 	}
 
 	@Override
-	public void setScenarioIterationCount(long count) {
-		scenarioIterationCount = count;
+	public long getDefaultScenarioIterationCount() {
+		return defaultScenarioIterationCount;
 	}
 
 	@Override
-	public long getScenarioIterationCount() {
-		return scenarioIterationCount;
+	public void setDefaultScenarioIterationCount(long count) {
+		defaultScenarioIterationCount = count;
 	}
 
 	@Override
-	public void setScenarioUserCount(int count) {
-		scenarioUserCount = count;
+	public long getDefaultScenarioRunIterationCount() {
+		return defaultScenarioRunIterationCount;
 	}
 
 	@Override
-	public int getScenarioUserCount() {
-		return scenarioUserCount;
+	public void setDefaultScenarioRunIterationCount(int count) {
+		defaultScenarioRunIterationCount = count;
 	}
 
 	@Override
-	public ScenarioData getScenarioClassData(Object scenario) {
-		String className = scenario.getClass().getName();
+	public void setDefaultScenarioUserCount(int count) {
+		defaultScenarioUserCount = count;
+	}
+
+	@Override
+	public int getDefaultScenarioUserCount() {
+		return defaultScenarioUserCount;
+	}
+
+	@Override
+	public ScenarioData getScenarioClassData(Class<Scenario> scenario) {
+		String className = scenario.getName();
 		ScenarioData scenarioData = scenarioClassDataMap.get(className);
 		if (scenarioData == null) {
 			scenarioData = new ScenarioDataImpl();

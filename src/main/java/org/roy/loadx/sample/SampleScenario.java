@@ -5,8 +5,13 @@ import org.roy.loadx.api.Scenario;
 public class SampleScenario implements Scenario {
 
 	@Override
-	public void initialize() {
-		System.out.println("initialize");
+	public void initializeUser() {
+		System.out.println("initialize user");
+	}
+
+	@Override
+	public void start() {
+		System.out.println("start");
 
 	}
 
@@ -16,8 +21,12 @@ public class SampleScenario implements Scenario {
 	}
 
 	@Override
-	public void terminate() {
-		System.out.println("terminate");
+	public void end() {
+		System.out.println("end");
 	}
 
+	@Override
+	public void terminateUser() {
+		System.out.println("terminate user");
+	}
 }

@@ -11,7 +11,9 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
+import org.roy.loadx.api.Scenario;
 import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
 
@@ -26,7 +28,6 @@ public class LoadX {
 	}
 
 	private void runJavaScript(String resourcePath) {
-
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("nashorn");
 
@@ -73,13 +74,22 @@ public class LoadX {
 		}
 	}
 
+	private Scenario getScenario(Job job) {
+		try {
+			return (Scenario) job.getScenarioClass().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private void runJob(JobImpl jobImpl) {
 		runJobIntialize(jobImpl);
 
-		ExecutorService executorService = Executors.newFixedThreadPool(jobImpl.getScenarioUserCount());
+		ExecutorService executorService = Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
-		for (int i = 0; i < jobImpl.getScenarioUserCount(); ++i) {
-			executorService.execute(new ScenarioRunner(jobImpl.getScenario(), jobImpl.getScenarioIterationCount()));
+		for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
+			executorService.execute(new ScenarioRunner(getScenario(jobImpl), jobImpl.getDefaultScenarioIterationCount(),
+					jobImpl.getDefaultScenarioRunIterationCount()));
 		}
 
 		executorService.shutdown();
