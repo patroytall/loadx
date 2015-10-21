@@ -1,12 +1,16 @@
 package org.roy.loadx.sample;
 
 import org.roy.loadx.api.Scenario;
+import org.roy.loadx.api.ExecutionData;
 
 public class SampleScenario implements Scenario {
+	public enum Data {
+		URL
+	};
 
 	@Override
-	public void initializeUser() {
-		System.out.println("initialize user");
+	public void initializeObject(ExecutionData scenarioClassData) {
+		System.out.println("initialize user - url: " + scenarioClassData.getString(Data.URL.toString()));
 	}
 
 	@Override
@@ -26,7 +30,7 @@ public class SampleScenario implements Scenario {
 	}
 
 	@Override
-	public void terminateUser() {
+	public void terminateObject() {
 		System.out.println("terminate user");
 	}
 }

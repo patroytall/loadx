@@ -1,7 +1,7 @@
 package org.roy.loadx.api;
 
 public interface Scenario {
-	void initializeUser();
+	void initializeObject(ExecutionData scenarioClassData);
 
 	void start();
 
@@ -9,5 +9,5 @@ public interface Scenario {
 
 	void end();
 
-	void terminateUser();
+	void terminateObject();
 }

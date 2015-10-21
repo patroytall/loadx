@@ -3,13 +3,13 @@ package org.roy.loadx.job;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
-import org.roy.loadx.api.ScenarioData;
 
 public class JobImpl implements Job {
-	private final Map<Object, ScenarioData> scenarioClassDataMap = new HashMap<>();
+	private final Map<Object, ExecutionData> scenarioClassDataMap = new HashMap<>();
 
 	private Class<Scenario> scenarioClass;
 	private long defaultScenarioIterationCount = DEFAULT_SCENARIO_ITERATION_COUNT;
@@ -20,9 +20,7 @@ public class JobImpl implements Job {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setScenario(Object scenarioClass) {
-		// Uses JDK internal class to allow Javascript job to pass scenario classes without .class suffix. Probably only works with Java 8
-		jdk.internal.dynalink.beans.StaticClass staticClass = (jdk.internal.dynalink.beans.StaticClass) scenarioClass;
-		this.scenarioClass = (Class<Scenario>) staticClass.getRepresentedClass();
+		this.scenarioClass = (Class<Scenario>) getClassFromJavascriptOrJavaClass(scenarioClass);
 	}
 
 	@Override
@@ -61,14 +59,24 @@ public class JobImpl implements Job {
 	}
 
 	@Override
-	public ScenarioData getScenarioClassData(Class<Scenario> scenario) {
-		String className = scenario.getName();
-		ScenarioData scenarioData = scenarioClassDataMap.get(className);
-		if (scenarioData == null) {
-			scenarioData = new ScenarioDataImpl();
-			scenarioClassDataMap.put(className, scenarioData);
+	public ExecutionData getScenarioClassData(Object scenarioClass) {
+		String className = getClassFromJavascriptOrJavaClass(scenarioClass).getName();
+		ExecutionData scenarioClassData = scenarioClassDataMap.get(className);
+		if (scenarioClassData == null) {
+			scenarioClassData = new ExecutionDataImpl();
+			scenarioClassDataMap.put(className, scenarioClassData);
 		}
-		return scenarioData;
+		return scenarioClassData;
+	}
+
+	private Class<?> getClassFromJavascriptOrJavaClass(Object clazz) {
+		if (clazz instanceof jdk.internal.dynalink.beans.StaticClass) {
+			// Uses JDK internal class to allow Javascript job to pass scenario classes without .class suffix. Probably only works with Java 8
+			jdk.internal.dynalink.beans.StaticClass staticClass = (jdk.internal.dynalink.beans.StaticClass) clazz;
+			return staticClass.getRepresentedClass();
+		} else {
+			return (Class<?>) clazz;
+		}
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import javax.script.ScriptEngineManager;
 import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
+import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
 
@@ -88,8 +89,9 @@ public class LoadX {
 		ExecutorService executorService = Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
 		for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
+			ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
 			executorService.execute(new ScenarioRunner(getScenario(jobImpl), jobImpl.getDefaultScenarioIterationCount(),
-					jobImpl.getDefaultScenarioRunIterationCount()));
+					jobImpl.getDefaultScenarioRunIterationCount(), scenarioClassData));
 		}
 
 		executorService.shutdown();

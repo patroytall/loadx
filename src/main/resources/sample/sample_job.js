@@ -6,4 +6,5 @@ with (new JavaImporter(org.roy.loadx.sample)) {
 	setJobInitializer(new SampleJobInitializer())
 	
 	setScenario(SampleScenario)
+	getScenarioClassData(SampleScenario).put(SampleScenario.Data.URL, "http://somewhere.com")
 }

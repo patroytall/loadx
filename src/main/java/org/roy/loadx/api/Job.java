@@ -32,5 +32,5 @@ public interface Job {
 
 	int getDefaultScenarioUserCount();
 
-	ScenarioData getScenarioClassData(Class<Scenario> scenarioClass);
+	ExecutionData getScenarioClassData(Object scenarioClass);
 }
