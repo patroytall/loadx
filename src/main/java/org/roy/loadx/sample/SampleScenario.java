@@ -1,7 +1,8 @@
 package org.roy.loadx.sample;
 
-import org.roy.loadx.api.Scenario;
 import org.roy.loadx.api.ExecutionData;
+import org.roy.loadx.api.Scenario;
+import org.roy.loadx.api.TransactionRecorder;
 
 public class SampleScenario implements Scenario {
 	public enum Data {
@@ -9,7 +10,7 @@ public class SampleScenario implements Scenario {
 	};
 
 	@Override
-	public void initializeObject(ExecutionData scenarioClassData) {
+	public void initializeObject(ExecutionData scenarioClassData, TransactionRecorder transactionRecorder) {
 		System.out.println("initialize user - url: " + scenarioClassData.getString(Data.URL.toString()));
 	}
 

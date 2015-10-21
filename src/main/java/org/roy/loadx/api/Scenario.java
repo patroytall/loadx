@@ -1,7 +1,7 @@
 package org.roy.loadx.api;
 
 public interface Scenario {
-	void initializeObject(ExecutionData scenarioClassData);
+	void initializeObject(ExecutionData scenarioClassData, TransactionRecorder transactionRecorder);
 
 	void start();
 

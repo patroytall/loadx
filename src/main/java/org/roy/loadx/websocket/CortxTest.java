@@ -25,7 +25,7 @@ public class CortxTest {
 	private static final String HTML_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
 	private static final String EDN_ACCEPT = "application/vnd.cenx.services.v1+edn;charset=UTF-8";
 
-	public static void testNetworkViewWebsocket() {
+	public static void main(String[] args) {
 		// CookieStore cookieStore = new BasicCookieStore();
 		// CloseableHttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 

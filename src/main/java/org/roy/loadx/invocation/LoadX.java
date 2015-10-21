@@ -11,12 +11,13 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
-import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
+import org.roy.loadx.transaction.TransactionAggregator;
 
 /**
  * To use Eclipse TCP/IP Monitor (domain set up required to support SSO): - configure /private/etc/hosts file with entry like: 127.0.0.1
@@ -88,10 +89,12 @@ public class LoadX {
 
 		ExecutorService executorService = Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
+		TransactionAggregator transactionAggregator = new TransactionAggregator();
+
 		for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
 			ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
 			executorService.execute(new ScenarioRunner(getScenario(jobImpl), jobImpl.getDefaultScenarioIterationCount(),
-					jobImpl.getDefaultScenarioRunIterationCount(), scenarioClassData));
+					jobImpl.getDefaultScenarioRunIterationCount(), scenarioClassData, transactionAggregator));
 		}
 
 		executorService.shutdown();
