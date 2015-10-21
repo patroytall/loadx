@@ -5,7 +5,7 @@ public interface Job {
 	static final long DEFAULT_SCENARIO_RUN_ITERATION_COUNT = 1;
 	static final int DEFAULT_SCENARIO_USER_COUNT = 1;
 
-	void setScenario(Object scenarioClass);
+	Object addScenario(Object scenarioClass);
 
 	/**
 	 * Override the DEFAULT_SCENARIO_ITERATION_COUNT value

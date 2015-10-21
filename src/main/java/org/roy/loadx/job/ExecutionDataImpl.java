@@ -16,6 +16,11 @@ public class ExecutionDataImpl implements ExecutionData {
 
 	@Override
 	public String getString(Object name) {
-		return (String) map.get(name.toString());
+		String strName = name.toString();
+		String str = (String) map.get(strName);
+		if (str == null) {
+			throw new RuntimeException("no execution data for name: " + strName);
+		}
+		return str;
 	}
 }

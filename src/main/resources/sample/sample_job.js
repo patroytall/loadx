@@ -3,8 +3,8 @@ with (new JavaImporter(org.roy.loadx.sample)) {
 	setDefaultScenarioRunIterationCount(2)
 	setDefaultScenarioUserCount(2)
 
+	getScenarioClassData(addScenario(SampleScenario))
+		.put(SampleScenario.Data.URL, "http://somewhere.com")
+
 	setJobInitializer(new SampleJobInitializer())
-	
-	setScenario(SampleScenario)
-	getScenarioClassData(SampleScenario).put(SampleScenario.Data.URL, "http://somewhere.com")
 }

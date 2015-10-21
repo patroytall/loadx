@@ -19,8 +19,12 @@ public class JobImpl implements Job {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void setScenario(Object scenarioClass) {
+	public Object addScenario(Object scenarioClass) {
+		if (this.scenarioClass != null) {
+			throw new RuntimeException("only one scenario currently supported");
+		}
 		this.scenarioClass = (Class<Scenario>) getClassFromJavascriptOrJavaClass(scenarioClass);
+		return scenarioClass;
 	}
 
 	@Override
