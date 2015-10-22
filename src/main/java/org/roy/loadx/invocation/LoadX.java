@@ -11,22 +11,39 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.roy.loadx.SpringConfig;
 import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
 import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
+import org.roy.loadx.transaction.TimeProvider;
 import org.roy.loadx.transaction.TransactionAggregator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.stereotype.Component;
 
 /**
  * To use Eclipse TCP/IP Monitor (domain set up required to support SSO): - configure /private/etc/hosts file with entry like: 127.0.0.1
  * localhost.qa01.cenx.localnet - use host localhost.qa01.cenx.localnet:1234 as balancer URL in LoadX - configure monitor to list on port 1234 and
  * forward to balancer01.qa01.cenx.localnet
  */
+@Component
 public class LoadX {
+	@Autowired
+	private TimeProvider timeProvider;
+
 	public static void main(String[] args) {
-		new LoadX().runJavaScript(args[0]);
+		try (AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(SpringConfig.class)) {
+			LoadX loadX = ac.getBean(LoadX.class);
+			loadX.run(args);
+		}
+	}
+
+	public void run(String[] args) {
+		timeProvider.nanoTime();
+		runJavaScript(args[0]);
 	}
 
 	private void runJavaScript(String resourcePath) {
@@ -94,7 +111,7 @@ public class LoadX {
 		for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
 			ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
 			executorService.execute(new ScenarioRunner(getScenario(jobImpl), jobImpl.getDefaultScenarioIterationCount(),
-					jobImpl.getDefaultScenarioRunIterationCount(), scenarioClassData, transactionAggregator));
+					jobImpl.getDefaultScenarioRunIterationCount(), scenarioClassData, transactionAggregator, timeProvider));
 		}
 
 		executorService.shutdown();
