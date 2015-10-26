@@ -6,4 +6,12 @@ public class Util {
 		int rightPos = str.indexOf(rightBoundary, leftPos);
 		return str.substring(leftPos, rightPos);
 	}
+
+	public static void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

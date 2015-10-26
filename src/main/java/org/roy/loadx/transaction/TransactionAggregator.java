@@ -25,7 +25,7 @@ public class TransactionAggregator {
 		return transactionNames;
 	}
 
-	public synchronized double getTransactionAverageDurationMilli(String name) {
-		return transactions.get(name).getAverageDurationMilli();
+	public synchronized TransactionData getTransactionData(String name) {
+		return new TransactionData(transactions.get(name));
 	}
 }

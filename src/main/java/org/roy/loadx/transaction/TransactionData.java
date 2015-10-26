@@ -9,6 +9,11 @@ public class TransactionData {
 		this.averageDurationMilli = 0;
 	}
 
+	public TransactionData(TransactionData transactionData) {
+		transactionCount = transactionData.transactionCount;
+		averageDurationMilli = transactionData.averageDurationMilli;
+	}
+
 	public TransactionData add(double durationMilli) {
 		long previousTransactionCount = transactionCount;
 		transactionCount++;
@@ -18,5 +23,9 @@ public class TransactionData {
 
 	public double getAverageDurationMilli() {
 		return averageDurationMilli;
+	}
+
+	public long getTransactionCount() {
+		return transactionCount;
 	}
 }

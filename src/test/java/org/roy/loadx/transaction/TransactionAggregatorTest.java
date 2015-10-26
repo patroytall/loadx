@@ -14,6 +14,6 @@ public class TransactionAggregatorTest {
 		TransactionAggregator sut = new TransactionAggregator();
 		sut.addTransaction(TRANSACTION_NAME, DURATION_MILLI);
 
-		assertEquals(DURATION_MILLI, sut.getTransactionAverageDurationMilli(TRANSACTION_NAME), TestTimeProvider.TIME_DELTA);
+		assertEquals(DURATION_MILLI, sut.getTransactionData(TRANSACTION_NAME).getAverageDurationMilli(), TestTimeProvider.TIME_DELTA);
 	}
 }

@@ -20,7 +20,7 @@ import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
 import org.roy.loadx.transaction.TimeProvider;
 import org.roy.loadx.transaction.TransactionAggregator;
-import org.roy.loadx.transaction.TransactionPrinter;
+import org.roy.loadx.transaction.TransactionPrintRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
@@ -35,6 +35,9 @@ public class LoadX {
 	@Autowired
 	private TimeProvider timeProvider;
 
+	@Autowired
+	private TransactionPrintRunner transactionPrintRunner;
+
 	public static void main(String[] args) {
 		try (AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(SpringConfig.class)) {
 			LoadX loadX = ac.getBean(LoadX.class);
@@ -43,7 +46,7 @@ public class LoadX {
 	}
 
 	public void run(String[] args) {
-		timeProvider.nanoTime();
+		new Thread(transactionPrintRunner).start();
 		runJavaScript(args[0]);
 	}
 
@@ -108,6 +111,7 @@ public class LoadX {
 		ExecutorService executorService = Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
 		TransactionAggregator transactionAggregator = new TransactionAggregator();
+		transactionPrintRunner.print(transactionAggregator);
 
 		for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
 			ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
@@ -125,6 +129,6 @@ public class LoadX {
 
 		runJobTerminate(jobImpl);
 
-		new TransactionPrinter(transactionAggregator).print();
+		transactionPrintRunner.end();
 	}
 }
