@@ -1,8 +1,9 @@
-package org.roy.loadx.sample;
+package org.roy.test.integration;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.roy.loadx.SpringTestConfig;
+import org.roy.loadx.TestTimeProvider;
 import org.roy.loadx.invocation.LoadX;
 import org.roy.loadx.transaction.TimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +16,10 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 @ContextConfiguration(classes = SpringTestConfig.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners(listeners = { DependencyInjectionTestExecutionListener.class })
-public class SampleJobTest {
+public class LoadXSampleJobIntTest {
 	@Bean
 	TimeProvider timeProvider() {
-		return new TimeProvider() {
-			@Override
-			public long nanoTime() {
-				return 0;
-			}
-		};
+		return new TestTimeProvider();
 	}
 
 	@Autowired

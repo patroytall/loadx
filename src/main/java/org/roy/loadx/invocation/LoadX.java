@@ -20,6 +20,7 @@ import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
 import org.roy.loadx.transaction.TimeProvider;
 import org.roy.loadx.transaction.TransactionAggregator;
+import org.roy.loadx.transaction.TransactionPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
@@ -123,5 +124,7 @@ public class LoadX {
 		}
 
 		runJobTerminate(jobImpl);
+
+		new TransactionPrinter(transactionAggregator).print();
 	}
 }

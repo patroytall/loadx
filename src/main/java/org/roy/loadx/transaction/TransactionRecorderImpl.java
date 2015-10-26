@@ -16,13 +16,14 @@ public class TransactionRecorderImpl implements TransactionRecorder {
 
 	@Override
 	public void start(String name) {
+		this.name = name;
 		startTimeNano = timeProvider.nanoTime();
 	}
 
 	@Override
 	public void end() {
 		long endTimeNano = timeProvider.nanoTime();
-		double durationMilli = (endTimeNano - startTimeNano) / 1000000;
+		double durationMilli = (endTimeNano - startTimeNano) / 1e6;
 		transactionAggregator.addTransaction(name, durationMilli);
 	}
 }
