@@ -25,110 +25,114 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
-/**
- * To use Eclipse TCP/IP Monitor (domain set up required to support SSO): - configure /private/etc/hosts file with entry like: 127.0.0.1
- * localhost.qa01.cenx.localnet - use host localhost.qa01.cenx.localnet:1234 as balancer URL in LoadX - configure monitor to list on port 1234 and
- * forward to balancer01.qa01.cenx.localnet
+/*
+ * To use Eclipse TCP/IP Monitor: 
+ * - configure local hosts file with entry like: 127.0.0.1 localhost.remotedomain.com 
+ * - use host localhost.remotedomain.com:1234 as balancer URL in LoadX 
+ * - configure monitor to listen on port 1234 and forward to host.remotedomain.com
  */
 @Component
 public class LoadX {
-	@Autowired
-	private TimeProvider timeProvider;
+  @Autowired
+  private TimeProvider timeProvider;
 
-	@Autowired
-	private TransactionPrintRunner transactionPrintRunner;
+  @Autowired
+  private TransactionPrintRunner transactionPrintRunner;
 
-	public static void main(String[] args) {
-		try (AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(SpringConfig.class)) {
-			LoadX loadX = ac.getBean(LoadX.class);
-			loadX.run(args);
-		}
-	}
+  public static void main(String[] args) {
+    try (AnnotationConfigApplicationContext ac =
+        new AnnotationConfigApplicationContext(SpringConfig.class)) {
+      LoadX loadX = ac.getBean(LoadX.class);
+      loadX.run(args);
+    }
+  }
 
-	public void run(String[] args) {
-		new Thread(transactionPrintRunner).start();
-		runJavaScript(args[0]);
-	}
+  public void run(String[] args) {
+    new Thread(transactionPrintRunner).start();
+    runJavaScript(args[0]);
+  }
 
-	private void runJavaScript(String resourcePath) {
-		ScriptEngineManager factory = new ScriptEngineManager();
-		ScriptEngine engine = factory.getEngineByName("nashorn");
+  private void runJavaScript(String resourcePath) {
+    ScriptEngineManager factory = new ScriptEngineManager();
+    ScriptEngine engine = factory.getEngineByName("nashorn");
 
-		String script;
-		try {
-			URL a = LoadX.class.getResource("/" + resourcePath);
-			if (a == null) {
-				throw new RuntimeException("invalid resource path: " + resourcePath);
-			}
-			script = new String(Files.readAllBytes(Paths.get(a.toURI())));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+    String script;
+    try {
+      URL url = LoadX.class.getResource("/" + resourcePath);
+      if (url == null) {
+        throw new RuntimeException("invalid resource path: " + resourcePath);
+      }
+      script = new String(Files.readAllBytes(Paths.get(url.toURI())));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
-		JobImpl job = new JobImpl();
+    JobImpl job = new JobImpl();
 
-		try {
-			Object global = engine.eval("this");
-			Object jsObject = engine.eval("Object");
+    try {
+      Object global = engine.eval("this");
+      Object jsObject = engine.eval("Object");
 
-			Invocable invocable = (Invocable) engine;
+      Invocable invocable = (Invocable) engine;
 
-			invocable.invokeMethod(jsObject, "bindProperties", global, job);
+      invocable.invokeMethod(jsObject, "bindProperties", global, job);
 
-			engine.eval(script);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+      engine.eval(script);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
-		runJob(job);
-	}
+    runJob(job);
+  }
 
-	private void runJobIntialize(JobImpl jobImpl) {
-		JobInitializer jobInitializer = jobImpl.getJobInitializer();
-		if (jobInitializer != null) {
-			jobInitializer.initialize();
-		}
-	}
+  private void runJobIntialize(JobImpl jobImpl) {
+    JobInitializer jobInitializer = jobImpl.getJobInitializer();
+    if (jobInitializer != null) {
+      jobInitializer.initialize();
+    }
+  }
 
-	private void runJobTerminate(JobImpl jobImpl) {
-		JobInitializer jobInitializer = jobImpl.getJobInitializer();
-		if (jobInitializer != null) {
-			jobInitializer.terminate();
-		}
-	}
+  private void runJobTerminate(JobImpl jobImpl) {
+    JobInitializer jobInitializer = jobImpl.getJobInitializer();
+    if (jobInitializer != null) {
+      jobInitializer.terminate();
+    }
+  }
 
-	private Scenario getScenario(Job job) {
-		try {
-			return (Scenario) job.getScenarioClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-	}
+  private Scenario getScenario(Job job) {
+    try {
+      return (Scenario) job.getScenarioClass().newInstance();
+    } catch (InstantiationException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	private void runJob(JobImpl jobImpl) {
-		runJobIntialize(jobImpl);
+  private void runJob(JobImpl jobImpl) {
+    runJobIntialize(jobImpl);
 
-		ExecutorService executorService = Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
+    ExecutorService executorService =
+        Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
-		TransactionAggregator transactionAggregator = new TransactionAggregator();
-		transactionPrintRunner.print(transactionAggregator);
+    TransactionAggregator transactionAggregator = new TransactionAggregator();
+    transactionPrintRunner.print(transactionAggregator);
 
-		for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
-			ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
-			executorService.execute(new ScenarioRunner(getScenario(jobImpl), jobImpl.getDefaultScenarioIterationCount(),
-					jobImpl.getDefaultScenarioRunIterationCount(), scenarioClassData, transactionAggregator, timeProvider));
-		}
+    for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
+      ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
+      executorService.execute(new ScenarioRunner(getScenario(jobImpl),
+          jobImpl.getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
+          scenarioClassData, transactionAggregator, timeProvider));
+    }
 
-		executorService.shutdown();
+    executorService.shutdown();
 
-		try {
-			executorService.awaitTermination(1, TimeUnit.DAYS);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+    try {
+      executorService.awaitTermination(1, TimeUnit.DAYS);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
 
-		runJobTerminate(jobImpl);
+    runJobTerminate(jobImpl);
 
-		transactionPrintRunner.end();
-	}
+    transactionPrintRunner.end();
+  }
 }
