@@ -26,7 +26,7 @@ public class SampleScenario implements Scenario {
 
 	@Override
 	public void run() {
-		transactionRecorder.start("start");
+		transactionRecorder.start("run");
 		System.out.println("run");
 		transactionRecorder.end();
 	}

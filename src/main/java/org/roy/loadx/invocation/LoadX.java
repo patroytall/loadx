@@ -1,16 +1,5 @@
 package org.roy.loadx.invocation;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
 import org.roy.loadx.SpringConfig;
 import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.api.Job;
@@ -22,8 +11,21 @@ import org.roy.loadx.transaction.TimeProvider;
 import org.roy.loadx.transaction.TransactionAggregator;
 import org.roy.loadx.transaction.TransactionPrintRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 /*
  * To use Eclipse TCP/IP Monitor: 
@@ -39,6 +41,16 @@ public class LoadX {
   @Autowired
   private TransactionPrintRunner transactionPrintRunner;
 
+  @Autowired
+  private ApplicationContext applicationContext;
+  
+  private static LoadX instance;
+  
+  @PostConstruct
+  public void registerInstance() {
+      instance = this;
+  }
+  
   public static void main(String[] args) {
     try (AnnotationConfigApplicationContext ac =
         new AnnotationConfigApplicationContext(SpringConfig.class)) {
@@ -134,5 +146,9 @@ public class LoadX {
     runJobTerminate(jobImpl);
 
     transactionPrintRunner.end();
+  }
+  
+  public static ApplicationContext getApplicationContext() {
+    return instance.applicationContext;
   }
 }
