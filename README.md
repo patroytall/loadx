@@ -1,5 +1,9 @@
 # LoadX
-Load generation tool to test complex web applications. Work in progress. Not ready for public usage.
+Load generation tool to test complex application performance scenarios involving intricate logic and state manipulation.
+
+Engine runs Java based test cases from a single host. It can scale to 1000 concurrent users.
+
+Test cases are easy to configure using Javascript execution jobs.
 
 ## Sample Invocation
 
