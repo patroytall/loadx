@@ -1,7 +1,7 @@
 # LoadX
-LoadX is a load generation tool to test complex application performance scenarios involving intricate logic and state manipulation.
+LoadX is a load generation tool to test complex performance application scenarios involving intricate logic and state manipulation.
 
-Engine runs Java based test cases from a single host. It can scale to 1000 concurrent users.
+The Java LoadX engine runs Java based test cases from a single host. It can scale to 1000+ concurrent users.
 
 Test cases are easy to configure using Javascript execution jobs.
 
