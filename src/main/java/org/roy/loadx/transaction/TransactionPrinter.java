@@ -38,19 +38,19 @@ public class TransactionPrinter {
 		static private final int PRE_ALLOCATED_SPACE_PER_ROW = 26;
 		static private final String ELLIPSIS = "...";
 		
-		private int maxTransactionNameLength;
+		private int longestTransactionNameLength;
 		private ArrayList<TransactionDataSummaryEntry> rows;
 		
 		public TransactionDataSummary() {
-			maxTransactionNameLength = TRANSACTION_HEADER.length();
+			longestTransactionNameLength = TRANSACTION_HEADER.length();
 			rows = new ArrayList<>();
 		}
 		
 		public void add(TransactionDataSummaryEntry entry) {
 			rows.add(entry);
 			int transactionNameLength = entry.getTransactionName().length();
-			if (transactionNameLength > maxTransactionNameLength) {
-				maxTransactionNameLength = transactionNameLength;
+			if (transactionNameLength > longestTransactionNameLength) {
+				longestTransactionNameLength = transactionNameLength;
 			}
 		}
 		
@@ -72,7 +72,7 @@ public class TransactionPrinter {
 		}
 		
 		private int getTransactionColumnWidth() {
-			return Math.min(MAX_ROW_WIDTH - PRE_ALLOCATED_SPACE_PER_ROW, maxTransactionNameLength);
+			return Math.min(MAX_ROW_WIDTH - PRE_ALLOCATED_SPACE_PER_ROW, longestTransactionNameLength);
 		}
 		
 		private String getTransactionDisplayName(String transactionName) {
