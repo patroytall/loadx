@@ -36,6 +36,7 @@ public class TransactionPrinter {
 		static private final int MAX_ROW_WIDTH = 78;
 		static private final String ROW_FORMAT = "%%-%ds | %%10s | %%10s%n";
 		static private final int PRE_ALLOCATED_SPACE_PER_ROW = 26;
+		static private final String ELLIPSIS = "...";
 		
 		private int maxTransactionNameLength;
 		private ArrayList<TransactionDataSummaryEntry> rows;
@@ -76,10 +77,7 @@ public class TransactionPrinter {
 		
 		private String getTransactionDisplayName(String transactionName) {
 			int transactionColumnWidth = getTransactionColumnWidth();
-			if (transactionName.length() > transactionColumnWidth) {
-				return transactionName.substring(0, transactionColumnWidth - 3) + "...";
-			}
-			return transactionName;
+			return transactionName.length() > transactionColumnWidth ? transactionName.substring(0, transactionColumnWidth - ELLIPSIS.length()) + ELLIPSIS : transactionName;
 		}
 	}
 	
