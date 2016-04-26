@@ -34,19 +34,19 @@ public class TestUtil {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithLeftBoundaryMissing() {
+	public void findBoundariesThrowsWithMissingLeftBoundary() {
 		String src = String.format("abcfoobarxyz%s", RIGHT_BOUNDARY);
 		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, src);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithRightBoundaryMissing() {
+	public void findBoundariesThrowsWithMissingRightBoundary() {
 		String src = String.format("abc%sfoobarxyz", LEFT_BOUNDARY);
 		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, src);
 	}
 		
 	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithEmptySource() {
+	public void findBoundariesThrowsWithEmptyStringAndNonEmptyBoundaries() {
 		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, "");
 	}
 }

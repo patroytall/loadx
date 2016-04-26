@@ -4,14 +4,13 @@ public class Util {
 	
 	public static String findBoundaries(String leftBoundary, String rightBoundary, String str) {
 		int leftPos = str.indexOf(leftBoundary);
-		int rightPos = str.indexOf(rightBoundary);
-
 		if (leftPos == -1) {
-			throw new IllegalArgumentException(String.format("Left boundary '%s' does not exist in source '%s'!", leftBoundary, str));
+			throw new IllegalArgumentException(String.format("Left boundary %s does not exist in string: %s", leftBoundary, str));
 		}
 
+		int rightPos = str.indexOf(rightBoundary);
 		if (rightPos == -1) {
-			throw new IllegalArgumentException(String.format("Right boundary '%s' does not exist in source '%s'!", rightBoundary, str));
+			throw new IllegalArgumentException(String.format("Right boundary %s does not exist in string: %s", rightBoundary, str));
 		}
 
 		return str.substring(leftPos + leftBoundary.length(), rightPos);
