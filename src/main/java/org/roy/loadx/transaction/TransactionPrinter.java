@@ -42,30 +42,26 @@ public class TransactionPrinter {
 		
 		public TransactionDataSummary() {
 			maxTransactionNameLength = TRANSACTION_HEADER.length();
-			rows = new ArrayList<TransactionDataSummaryEntry>();
+			rows = new ArrayList<>();
 		}
 		
 		public void add(TransactionDataSummaryEntry entry) {
 			rows.add(entry);
-			int txNameLength = entry.getTransactionName().length();
-			if (txNameLength > maxTransactionNameLength) {
-				maxTransactionNameLength = txNameLength;
+			int transactionNameLength = entry.getTransactionName().length();
+			if (transactionNameLength > maxTransactionNameLength) {
+				maxTransactionNameLength = transactionNameLength;
 			}
 		}
 		
 		@Override
 		public String toString() {
-			int txColumnWidth = getTransactionColumnWidth();
+			int transactionColumnWidth = getTransactionColumnWidth();
 			String rowFormat = computeDynamicFormatString();
 			StringBuilder sb = new StringBuilder();
 			sb.append(String.format(rowFormat, TRANSACTION_HEADER, AVERAGE_HEADER, COUNT_HEADER));
-			sb.append(String.format(rowFormat, StringUtils.repeat("=", txColumnWidth), StringUtils.repeat("=", AVERAGE_HEADER.length()), StringUtils.repeat("=", COUNT_HEADER.length())));
+			sb.append(String.format(rowFormat, StringUtils.repeat("=", transactionColumnWidth), StringUtils.repeat("=", AVERAGE_HEADER.length()), StringUtils.repeat("=", COUNT_HEADER.length())));
 			for (TransactionDataSummaryEntry entry : rows) {
-				String name = entry.getTransactionName();
-				if (name.length() > txColumnWidth) {
-					name = name.substring(0, txColumnWidth - 3) + "...";
-				}
-				sb.append(String.format(rowFormat, name, entry.getAverage(), entry.getCount()));
+				sb.append(String.format(rowFormat, getTransactionDisplayName(entry.getTransactionName()), entry.getAverage(), entry.getCount()));
 			}
 			return sb.toString();
 		}
@@ -76,6 +72,14 @@ public class TransactionPrinter {
 		
 		private int getTransactionColumnWidth() {
 			return Math.min(MAX_ROW_WIDTH - PRE_ALLOCATED_SPACE_PER_ROW, maxTransactionNameLength);
+		}
+		
+		private String getTransactionDisplayName(String transactionName) {
+			int transactionColumnWidth = getTransactionColumnWidth();
+			if (transactionName.length() > transactionColumnWidth) {
+				return transactionName.substring(0, transactionColumnWidth - 3) + "...";
+			}
+			return transactionName;
 		}
 	}
 	
@@ -95,7 +99,7 @@ public class TransactionPrinter {
 			summary.add(new TransactionDataSummaryEntry(name, average, count));
 		}
 		System.out.println(summary);
-		System.out.flush();
 		System.out.println();
+		System.out.flush();
 	}
 }
