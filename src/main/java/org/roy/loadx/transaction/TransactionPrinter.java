@@ -33,7 +33,8 @@ public class TransactionPrinter {
 		static private final String TRANSACTION_HEADER = "Transaction";
 		static private final String AVERAGE_HEADER = "Average";
 		static private final String COUNT_HEADER = "Count";
-		static private final int MAX_ROW_WIDTH = 119;
+		static private final int MAX_ROW_WIDTH = 120;
+		static private final int CONSOLE_MAX_ROW_WIDTH = MAX_ROW_WIDTH - 1;
 		static private final String ROW_FORMAT = "%%-%ds | %%10s | %%10s%n";
 		static private final int PRE_ALLOCATED_SPACE_PER_ROW = 26;
 		static private final String ELLIPSIS = "...";
@@ -72,7 +73,7 @@ public class TransactionPrinter {
 		}
 		
 		private int getTransactionColumnWidth() {
-			return Math.min(MAX_ROW_WIDTH - PRE_ALLOCATED_SPACE_PER_ROW, longestTransactionNameLength);
+			return Math.min(CONSOLE_MAX_ROW_WIDTH - PRE_ALLOCATED_SPACE_PER_ROW, longestTransactionNameLength);
 		}
 		
 		private String getTransactionDisplayName(String transactionName) {
