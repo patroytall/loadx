@@ -81,6 +81,16 @@ public class TransactionPrinter {
 		}
 	}
 	
+	static private void println() {
+		System.out.println();
+		System.out.flush();
+	}
+	
+	static private void println(Object obj) {
+		System.out.println(obj);
+		println();
+	}
+	
 	private final TransactionAggregator transactionAggregator;
 
 	public TransactionPrinter(TransactionAggregator transactionAggregator) {
@@ -96,8 +106,6 @@ public class TransactionPrinter {
 			String count = String.valueOf(transactionData.getTransactionCount());
 			summary.add(new TransactionDataSummaryEntry(name, average, count));
 		}
-		System.out.println(summary);
-		System.out.println();
-		System.out.flush();
+		println(summary);
 	}
 }
