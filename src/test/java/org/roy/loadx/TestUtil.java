@@ -34,28 +34,19 @@ public class TestUtil {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithBoundariesMissing() {
-		String src = String.format("abcfoobarxyz");
+	public void testFindBoundariesWithLeftBoundaryMissing() {
+		String src = String.format("abcfoobarxyz%s", RIGHT_BOUNDARY);
 		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, src);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithNullSource() {
-		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, null);
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithEmptySource() {
-		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, "");
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithNullLeftBoundary() {
-		Util.findBoundaries(null, RIGHT_BOUNDARY, "foo");
+	public void testFindBoundariesWithRightBoundaryMissing() {
+		String src = String.format("abc%sfoobarxyz", LEFT_BOUNDARY);
+		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, src);
 	}
-	
+		
 	@Test(expected=IllegalArgumentException.class)
-	public void testFindBoundariesWithNullRightBoundary() {
-		Util.findBoundaries(LEFT_BOUNDARY, null, "foo");
+	public void testFindBoundariesWithEmptySource() {
+		Util.findBoundaries(LEFT_BOUNDARY, RIGHT_BOUNDARY, "");
 	}
 }
