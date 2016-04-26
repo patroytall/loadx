@@ -6,9 +6,9 @@ import org.apache.commons.lang.StringUtils;
 
 public class TransactionPrinter {
 	static private class TransactionDataSummaryEntry {
-		private String transactionName;
-		private String average;
-		private String count;
+		private final String transactionName;
+		private final String average;
+		private final String count;
 		
 		public TransactionDataSummaryEntry(String transactionName, String average, String count) {
 			this.transactionName = transactionName;
