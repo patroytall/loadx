@@ -1,19 +1,14 @@
 package org.roy.loadx.invocation;
 
-import org.roy.loadx.SpringConfig;
+import org.roy.loadx.Configuration;
+import org.roy.loadx.EngineConfiguration;
 import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
 import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.ScenarioRunner;
-import org.roy.loadx.transaction.TimeProvider;
 import org.roy.loadx.transaction.TransactionAggregator;
-import org.roy.loadx.transaction.TransactionPrintRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -22,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -33,34 +27,20 @@ import javax.script.ScriptEngineManager;
  * - use host localhost.remotedomain.com:1234 as balancer URL in LoadX 
  * - configure monitor to listen on port 1234 and forward to host.remotedomain.com
  */
-@Component
 public class LoadX {
-  @Autowired
-  private TimeProvider timeProvider;
-
-  @Autowired
-  private TransactionPrintRunner transactionPrintRunner;
-
-  @Autowired
-  private ApplicationContext applicationContext;
-  
-  private static LoadX instance;
-  
-  @PostConstruct
-  public void registerInstance() {
-      instance = this;
-  }
+  private Configuration configuration;
   
   public static void main(String[] args) {
-    try (AnnotationConfigApplicationContext ac =
-        new AnnotationConfigApplicationContext(SpringConfig.class)) {
-      LoadX loadX = ac.getBean(LoadX.class);
-      loadX.run(args);
-    }
+    new LoadX().run(args);
   }
 
   public void run(String[] args) {
-    new Thread(transactionPrintRunner).start();
+    run(args, new EngineConfiguration());
+  }
+
+  public void run(String[] args, Configuration configuration) {
+    this.configuration = configuration;
+    new Thread(this.configuration.getTransactionPrintRunner()).start();
     runJavaScript(args[0]);
   }
 
@@ -126,13 +106,13 @@ public class LoadX {
         Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
     TransactionAggregator transactionAggregator = new TransactionAggregator();
-    transactionPrintRunner.print(transactionAggregator);
+    configuration.getTransactionPrintRunner().print(transactionAggregator);
 
     for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
       ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
       executorService.execute(new ScenarioRunner(getScenario(jobImpl),
           jobImpl.getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
-          scenarioClassData, transactionAggregator, timeProvider));
+          scenarioClassData, transactionAggregator, configuration.getTimeProvider()));
     }
 
     executorService.shutdown();
@@ -145,10 +125,6 @@ public class LoadX {
 
     runJobTerminate(jobImpl);
 
-    transactionPrintRunner.end();
-  }
-  
-  public static ApplicationContext getApplicationContext() {
-    return instance.applicationContext;
+    configuration.getTransactionPrintRunner().end();
   }
 }
