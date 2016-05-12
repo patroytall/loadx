@@ -20,3 +20,9 @@ Install "Gradle for Eclipse : Buildship: Eclipse Plug-ins for Gradle:
 
 From Eclipse:
     File -> Import... -> Gradle -> Gradle Project
+
+## Release Notes
+
+### Version 1.1.0
+* Support for multiple scenarios
+
