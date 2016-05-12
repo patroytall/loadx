@@ -1,18 +1,20 @@
 package org.roy.loadx.invocation;
 
+import com.google.common.collect.FluentIterable;
+
 import org.roy.loadx.Configuration;
 import org.roy.loadx.EngineConfiguration;
-import org.roy.loadx.api.ExecutionData;
-import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
 import org.roy.loadx.job.JobImpl;
+import org.roy.loadx.job.JobScenarioImpl;
 import org.roy.loadx.job.ScenarioRunner;
 import org.roy.loadx.transaction.TransactionAggregator;
 
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,8 +30,10 @@ import javax.script.ScriptEngineManager;
  * - configure monitor to listen on port 1234 and forward to host.remotedomain.com
  */
 public class LoadX {
+  private Iterator<JobScenarioImpl> infiniteJobScenarioIterator;
+
   private Configuration configuration;
-  
+
   public static void main(String[] args) {
     new LoadX().run(args);
   }
@@ -91,12 +95,20 @@ public class LoadX {
     }
   }
 
-  private Scenario getScenario(Job job) {
+  private Scenario getScenario(JobScenarioImpl jobScenarioImpl) {
     try {
-      return (Scenario) job.getScenarioClass().newInstance();
+      return (Scenario) jobScenarioImpl.getScenarioClass().newInstance();
     } catch (InstantiationException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private void runJobScenario(JobScenarioImpl jobScenarioImpl, JobImpl jobImpl,
+      ExecutorService executorService, TransactionAggregator transactionAggregator) {
+    executorService.execute(new ScenarioRunner(getScenario(jobScenarioImpl),
+        jobImpl.getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
+        jobImpl.getScenarioClassData(jobScenarioImpl.getScenarioClass()), jobScenarioImpl.getObjectData(), transactionAggregator,
+        configuration.getTimeProvider()));
   }
 
   private void runJob(JobImpl jobImpl) {
@@ -108,11 +120,9 @@ public class LoadX {
     TransactionAggregator transactionAggregator = new TransactionAggregator();
     configuration.getTransactionPrintRunner().print(transactionAggregator);
 
+    infiniteJobScenarioIterator = FluentIterable.from(jobImpl.getJobScenarios()).cycle().iterator();
     for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
-      ExecutionData scenarioClassData = jobImpl.getScenarioClassData(jobImpl.getScenarioClass());
-      executorService.execute(new ScenarioRunner(getScenario(jobImpl),
-          jobImpl.getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
-          scenarioClassData, transactionAggregator, configuration.getTimeProvider()));
+      runJobScenario(infiniteJobScenarioIterator.next(), jobImpl, executorService, transactionAggregator);
     }
 
     executorService.shutdown();

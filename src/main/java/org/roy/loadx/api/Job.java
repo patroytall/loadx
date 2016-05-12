@@ -24,13 +24,11 @@ public interface Job {
 
 	void setJobInitializer(JobInitializer jobInitializer);
 
-	Class<Scenario> getScenarioClass();
-
 	long getDefaultScenarioIterationCount();
 
 	long getDefaultScenarioRunIterationCount();
 
 	int getDefaultScenarioUserCount();
-
-	ExecutionData getScenarioClassData(Object scenarioClass);
+	
+  ExecutionData getScenarioClassData(Object scenarioClass);
 }
