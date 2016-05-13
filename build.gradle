@@ -17,5 +17,10 @@ dependencies {
 }
 
 task('sourceJar', type: Jar) {
-  from { sourceSets.main.allJava }
+  classifier = 'sources'
+  from sourceSets.main.allJava
+}
+
+artifacts {
+  archives sourceJar
 }
