@@ -7,11 +7,9 @@ repositories {
 }
 
 dependencies {
-  compile 'org.springframework:spring-context:4.2.2.RELEASE'
   compile 'commons-lang:commons-lang:2.6'
   compile 'com.google.guava:guava:19.0'
 
-  testCompile 'org.springframework:spring-test:4.2.2.RELEASE'
   testCompile 'org.jmockit:jmockit:1.20'
   testCompile 'junit:junit:4.12'
 }
@@ -23,4 +21,10 @@ task('sourceJar', type: Jar) {
 
 artifacts {
   archives sourceJar
+}
+
+test {
+  useJUnit {
+    excludeCategories 'org.roy.loadx.ManualTest'
+  }
 }

@@ -23,6 +23,10 @@ From Eclipse:
 
 ## Release Notes
 
+### Version 1.2.0
+* Remove Sprind dependency
+* Manual integration tests
+
 ### Version 1.1.0
 * Support for multiple scenarios
 
