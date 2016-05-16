@@ -10,6 +10,7 @@ import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.JobScenarioImpl;
 import org.roy.loadx.job.ScenarioRunner;
 import org.roy.loadx.transaction.TransactionAggregator;
+import org.roy.loadx.transaction.TransactionPrinterFactoryImpl;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -118,7 +119,7 @@ public class LoadX {
         Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
     TransactionAggregator transactionAggregator = new TransactionAggregator();
-    configuration.getTransactionPrintRunner().print(transactionAggregator);
+    configuration.setTransactionPrintRunner(new TransactionPrinterFactoryImpl(), transactionAggregator);;
 
     infiniteJobScenarioIterator = FluentIterable.from(jobImpl.getJobScenarios()).cycle().iterator();
     for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
@@ -135,6 +136,6 @@ public class LoadX {
 
     runJobTerminate(jobImpl);
 
-    configuration.getTransactionPrintRunner().end();
+    configuration.getTransactionPrintRunner().stop();
   }
 }

@@ -23,6 +23,10 @@ From Eclipse:
 
 ## Release Notes
 
+### Version 1.3.0
+* New transaction factories
+* Improved integration test output
+
 ### Version 1.2.0
 * Remove Sprind dependency
 * Manual integration tests

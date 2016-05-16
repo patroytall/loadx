@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang.StringUtils;
 
-public class TransactionPrinter {
+public class TransactionPrinterImpl implements TransactionPrinter {
   static private class TransactionDataSummaryEntry {
     private final String transactionName;
     private final String average;
@@ -95,10 +95,11 @@ public class TransactionPrinter {
     System.out.flush();
   }
 
-  public TransactionPrinter(TransactionAggregator transactionAggregator) {
+  TransactionPrinterImpl(TransactionAggregator transactionAggregator) {
     this.transactionAggregator = transactionAggregator;
   }
 
+  @Override
   public void print() {
     TransactionDataSummary summary = new TransactionDataSummary();
     for (String name : transactionAggregator.getSortedTransactionNames()) {

@@ -14,6 +14,7 @@ public class SampleScenario implements Scenario {
   }
 
   private TransactionRecorder transactionRecorder;
+  private String scenarioType;
 
   @Override
   public void initializeObject(ExecutionData jobScenarioClassData,
@@ -21,33 +22,35 @@ public class SampleScenario implements Scenario {
     this.transactionRecorder = transactionRecorder;
     System.out.println("initialize - scenario class data - url: "
         + jobScenarioClassData.getString(Data.URL.toString()));
-    System.out.println("initialize - scenario object data - url: "
-        + jobScenarioObjectData.getObject(Data.SCENARIO_TYPE.toString()));
+    scenarioType =
+        ((String) jobScenarioObjectData.getObject(Data.SCENARIO_TYPE.toString())).toLowerCase();
+    System.out.println("initialize - scenario object data - scenario type: " + scenarioType);
   }
 
   @Override
   public void start() {
-    transactionRecorder.start("start");
-    System.out.println("start");
-    transactionRecorder.end();
+    action("start");
   }
 
   @Override
   public void run() {
-    transactionRecorder.start("run");
-    System.out.println("run");
-    transactionRecorder.end();
+    action("run");
   }
 
   @Override
   public void end() {
-    transactionRecorder.start("end");
-    System.out.println("end");
+    action("end");
+  }
+
+  private void action(String name) {
+    String transactionName = name + " - " + scenarioType;
+    transactionRecorder.start(transactionName);
+    System.out.println(transactionName);
     transactionRecorder.end();
   }
 
   @Override
   public void terminateObject() {
-    System.out.println("terminate user");
+    System.out.println("terminate object - " + scenarioType);
   }
 }
