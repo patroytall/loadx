@@ -7,9 +7,9 @@ import org.roy.loadx.TestConfiguration;
 import org.roy.loadx.invocation.LoadX;
 
 @Category(ManualTest.class)
-public class LoadXSampleJobIntTest {
+public class LoadXSampleTest {
 	@Test
-	public void runSampleJob() {
+	public void sampleJob() {
 		new LoadX().run(new String[] { "sample/sample_job.js" }, new TestConfiguration());
 	}
 }

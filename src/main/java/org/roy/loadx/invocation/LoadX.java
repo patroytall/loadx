@@ -10,6 +10,9 @@ import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.JobScenarioImpl;
 import org.roy.loadx.job.ScenarioRunner;
 import org.roy.loadx.transaction.TransactionAggregator;
+import org.roy.loadx.transaction.TransactionPrintRunner;
+import org.roy.loadx.transaction.TransactionPrintRunnerThread;
+import org.roy.loadx.transaction.TransactionPrinterFactory;
 import org.roy.loadx.transaction.TransactionPrinterFactoryImpl;
 
 import java.net.URL;
@@ -34,6 +37,8 @@ public class LoadX {
   private Iterator<JobScenarioImpl> infiniteJobScenarioIterator;
 
   private Configuration configuration;
+  private TransactionAggregator transactionAggregator = new TransactionAggregator();
+  private TransactionPrintRunner transactionPrintRunner;
 
   public static void main(String[] args) {
     new LoadX().run(args);
@@ -45,7 +50,6 @@ public class LoadX {
 
   public void run(String[] args, Configuration configuration) {
     this.configuration = configuration;
-    new Thread(this.configuration.getTransactionPrintRunner()).start();
     runJavaScript(args[0]);
   }
 
@@ -108,8 +112,18 @@ public class LoadX {
       ExecutorService executorService, TransactionAggregator transactionAggregator) {
     executorService.execute(new ScenarioRunner(getScenario(jobScenarioImpl),
         jobImpl.getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
-        jobImpl.getScenarioClassData(jobScenarioImpl.getScenarioClass()), jobScenarioImpl.getObjectData(), transactionAggregator,
-        configuration.getTimeProvider()));
+        jobImpl.getScenarioClassData(jobScenarioImpl.getScenarioClass()),
+        jobScenarioImpl.getObjectData(), transactionAggregator, configuration.getTimeProvider()));
+  }
+
+  private void startTransactionPrintRunner() {
+    transactionPrintRunner = configuration.getTransactionPrintRunner();
+    if (transactionPrintRunner == null) {
+      TransactionPrinterFactory transactionPrinterFactory = new TransactionPrinterFactoryImpl();
+      transactionPrintRunner =
+          new TransactionPrintRunnerThread(transactionPrinterFactory.getInstance(transactionAggregator));
+    }
+    transactionPrintRunner.start();
   }
 
   private void runJob(JobImpl jobImpl) {
@@ -118,12 +132,12 @@ public class LoadX {
     ExecutorService executorService =
         Executors.newFixedThreadPool(jobImpl.getDefaultScenarioUserCount());
 
-    TransactionAggregator transactionAggregator = new TransactionAggregator();
-    configuration.setTransactionPrintRunner(new TransactionPrinterFactoryImpl(), transactionAggregator);;
+    startTransactionPrintRunner();
 
     infiniteJobScenarioIterator = FluentIterable.from(jobImpl.getJobScenarios()).cycle().iterator();
     for (int i = 0; i < jobImpl.getDefaultScenarioUserCount(); ++i) {
-      runJobScenario(infiniteJobScenarioIterator.next(), jobImpl, executorService, transactionAggregator);
+      runJobScenario(infiniteJobScenarioIterator.next(), jobImpl, executorService,
+          transactionAggregator);
     }
 
     executorService.shutdown();
@@ -136,6 +150,6 @@ public class LoadX {
 
     runJobTerminate(jobImpl);
 
-    configuration.getTransactionPrintRunner().stop();
+    transactionPrintRunner.done();
   }
 }

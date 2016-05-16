@@ -1,19 +1,20 @@
 package org.roy.loadx.transaction;
 
-public class TransactionPrintRunnerImpl implements TransactionPrintRunner {
+public class TransactionPrintRunnerThread extends Thread implements TransactionPrintRunner {
   private static final long PRINT_INTERVAL_TIME_SECONDS = 3;
 
-  private final Thread runThread = Thread.currentThread();
+  private Thread runThread;
   private final TransactionPrinter transactionPrinter;
 
   private boolean done = false;
 
-  public TransactionPrintRunnerImpl(TransactionPrinter transactionPrinter) {
+  public TransactionPrintRunnerThread(TransactionPrinter transactionPrinter) {
     this.transactionPrinter = transactionPrinter;
   }
 
   @Override
   public void run() {
+    runThread = Thread.currentThread();
     while (!done) {
       printTransactions();
       try {
@@ -32,8 +33,10 @@ public class TransactionPrintRunnerImpl implements TransactionPrintRunner {
   }
 
   @Override
-  public void stop() {
+  public void done() {
     done = true;
-    runThread.interrupt();
+    if (runThread != null) {
+      runThread.interrupt();
+    }
   }
 }

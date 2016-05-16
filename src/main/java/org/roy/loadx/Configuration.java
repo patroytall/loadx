@@ -1,20 +1,16 @@
 package org.roy.loadx;
 
 import org.roy.loadx.transaction.TimeProvider;
-import org.roy.loadx.transaction.TransactionAggregator;
 import org.roy.loadx.transaction.TransactionPrintRunner;
-import org.roy.loadx.transaction.TransactionPrinterFactory;
 
+/**
+ * All methods of this class return the same object instance when called multiple times.
+ */
 public interface Configuration {
-  /**
-   * Get the time provider.
-   * 
-   * @return always the same object
-   */
   TimeProvider getTimeProvider();
 
+  /**
+   * @return Transaction runner to use instead of default.
+   */
   TransactionPrintRunner getTransactionPrintRunner();
-
-  void setTransactionPrintRunner(TransactionPrinterFactory transactionPrinterFactory,
-      TransactionAggregator transactionAggregator);
 }

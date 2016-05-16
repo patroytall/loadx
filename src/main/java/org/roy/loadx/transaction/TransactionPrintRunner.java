@@ -1,5 +1,6 @@
 package org.roy.loadx.transaction;
 
-public interface TransactionPrintRunner extends Runnable {
-	void stop();
+public interface TransactionPrintRunner {
+  void start();
+  void done();
 }

@@ -45,12 +45,17 @@ public class SampleScenario implements Scenario {
   private void action(String name) {
     String transactionName = name + " - " + scenarioType;
     transactionRecorder.start(transactionName);
-    System.out.println(transactionName);
+    println(transactionName);
     transactionRecorder.end();
   }
 
   @Override
   public void terminateObject() {
-    System.out.println("terminate object - " + scenarioType);
+    println("terminate object - " + scenarioType);
+  }
+  
+  private static void println(String str) {
+    System.out.println(str);
+    System.out.flush();
   }
 }

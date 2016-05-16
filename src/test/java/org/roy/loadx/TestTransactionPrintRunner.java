@@ -4,12 +4,12 @@ import org.roy.loadx.transaction.TransactionPrintRunner;
 
 public class TestTransactionPrintRunner implements TransactionPrintRunner {
 	@Override
-	public void run() {
-		System.out.println("transaction print runner - run");
+	public void start() {
+		System.out.println("test transaction print runner - start");
 	}
 
 	@Override
-	public void stop() {
-		System.out.println("transaction print runner - stop");
+	public void done() {
+		System.out.println("test transaction print runner - done");
 	}
 }

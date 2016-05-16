@@ -23,6 +23,9 @@ From Eclipse:
 
 ## Release Notes
 
+### Version 1.4.0
+* Always print summary after transaction aggregation and terminate
+
 ### Version 1.3.0
 * New transaction factories
 * Improved integration test output
