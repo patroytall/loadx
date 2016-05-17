@@ -1,4 +1,6 @@
-package org.roy.loadx.transaction;
+package org.roy.loadx.transaction.print;
+
+import org.roy.loadx.transaction.TransactionAggregator;
 
 public class TransactionPrinterFactoryImpl implements TransactionPrinterFactory {
 

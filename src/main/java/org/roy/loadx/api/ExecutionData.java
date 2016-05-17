@@ -1,12 +1,14 @@
 package org.roy.loadx.api;
 
 public interface ExecutionData {
-  ExecutionData put(String name, String value);
+  ExecutionData put(Object key, Object value);
 
   /**
-   * @throws RuntimeException if name is not found
+   * @throws RuntimeException if object is not found
    */
-  Object getObject(String name);
+  Object getObject(Object key);
 
-  String getString(String name);
+  String getString(Object key);
+  
+  Long getLong(Object key);
 }

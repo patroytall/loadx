@@ -10,10 +10,10 @@ import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.JobScenarioImpl;
 import org.roy.loadx.job.ScenarioRunner;
 import org.roy.loadx.transaction.TransactionAggregator;
-import org.roy.loadx.transaction.TransactionPrintRunner;
-import org.roy.loadx.transaction.TransactionPrintRunnerThread;
-import org.roy.loadx.transaction.TransactionPrinterFactory;
-import org.roy.loadx.transaction.TransactionPrinterFactoryImpl;
+import org.roy.loadx.transaction.print.TransactionPrintRunner;
+import org.roy.loadx.transaction.print.TransactionPrintRunnerThread;
+import org.roy.loadx.transaction.print.TransactionPrinterFactory;
+import org.roy.loadx.transaction.print.TransactionPrinterFactoryImpl;
 
 import java.net.URL;
 import java.nio.file.Files;

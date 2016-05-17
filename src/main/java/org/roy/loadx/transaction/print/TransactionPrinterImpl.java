@@ -1,8 +1,10 @@
-package org.roy.loadx.transaction;
+package org.roy.loadx.transaction.print;
 
 import java.util.ArrayList;
 
 import org.apache.commons.lang.StringUtils;
+import org.roy.loadx.transaction.TransactionAggregator;
+import org.roy.loadx.transaction.TransactionData;
 
 public class TransactionPrinterImpl implements TransactionPrinter {
   static private class TransactionDataSummaryEntry {

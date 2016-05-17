@@ -1,7 +1,7 @@
 package org.roy.loadx;
 
 import org.roy.loadx.transaction.TimeProvider;
-import org.roy.loadx.transaction.TransactionPrintRunner;
+import org.roy.loadx.transaction.print.TransactionPrintRunner;
 
 /**
  * All methods of this class return the same object instance when called multiple times.

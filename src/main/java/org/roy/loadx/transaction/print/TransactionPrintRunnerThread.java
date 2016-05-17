@@ -1,4 +1,4 @@
-package org.roy.loadx.transaction;
+package org.roy.loadx.transaction.print;
 
 public class TransactionPrintRunnerThread extends Thread implements TransactionPrintRunner {
   private static final long PRINT_INTERVAL_TIME_SECONDS = 3;
