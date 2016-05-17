@@ -12,12 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 public class JobImpl implements Job {
+  private final ExecutionData jobData = new ExecutionDataImpl();
   private final Map<Class<Scenario>, ExecutionData> scenarioClassDataMap = new HashMap<>();
   private final List<JobScenarioImpl> jobScenarios = new ArrayList<>();
 
   private long defaultScenarioIterationCount = DEFAULT_SCENARIO_ITERATION_COUNT;
   private long defaultScenarioRunIterationCount = DEFAULT_SCENARIO_RUN_ITERATION_COUNT;
-  private int defaultScenarioUserCount = DEFAULT_SCENARIO_USER_COUNT;
+  private int defaultScenarioThreadCount = DEFAULT_SCENARIO_THREAD_COUNT;
   private JobInitializer jobInitializer;
 
   @SuppressWarnings("unchecked")
@@ -64,18 +65,18 @@ public class JobImpl implements Job {
   }
 
   @Override
-  public void setDefaultScenarioRunIterationCount(int count) {
+  public void setDefaultScenarioRunIterationCount(long count) {
     defaultScenarioRunIterationCount = count;
   }
 
   @Override
-  public void setDefaultScenarioUserCount(int count) {
-    defaultScenarioUserCount = count;
+  public void setDefaultScenarioThreadCount(int count) {
+    defaultScenarioThreadCount = count;
   }
 
   @Override
-  public int getDefaultScenarioUserCount() {
-    return defaultScenarioUserCount;
+  public int getDefaultScenarioThreadCount() {
+    return defaultScenarioThreadCount;
   }
 
   private Class<?> getClassFromJavascriptOrJavaClass(Object clazz) {
@@ -97,5 +98,10 @@ public class JobImpl implements Job {
 
   public JobInitializer getJobInitializer() {
     return jobInitializer;
+  }
+
+  @Override
+  public ExecutionData getJobData() {
+    return jobData;
   }
 }

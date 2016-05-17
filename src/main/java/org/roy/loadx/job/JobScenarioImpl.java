@@ -5,7 +5,7 @@ import org.roy.loadx.api.JobScenario;
 import org.roy.loadx.api.Scenario;
 
 public class JobScenarioImpl implements JobScenario {
-  private final ExecutionData objectData = new ExecutionDataImpl();
+  private final ExecutionData scenarioData = new ExecutionDataImpl();
   private final Class<Scenario> scenarioClass;
 
   JobScenarioImpl(Class<Scenario> scenarioClass) {
@@ -13,8 +13,8 @@ public class JobScenarioImpl implements JobScenario {
   }
 
   @Override
-  public ExecutionData getObjectData() {
-    return objectData;
+  public ExecutionData getScenarioData() {
+    return scenarioData;
   }
   
   public Class<Scenario> getScenarioClass() {

@@ -11,20 +11,22 @@ public class ScenarioRunner implements Runnable {
   private final Scenario scenario;
   private final long scenarioIterationCount;
   private final long scenarioRunIterationCount;
+  private final ExecutionData scenarioData;
   private final ExecutionData scenarioClassData;
-  private final ExecutionData scenarioObjectData;
+  private final ExecutionData jobData;
   private final TransactionAggregator transactionAggregator;
   private final TimeProvider timeProvider;
 
   public ScenarioRunner(Scenario scenario, long defaultScenarioIterationCount,
-      long defaultScenarioRunIterationCount, ExecutionData scenarioClassData,
-      ExecutionData scenarioObjectData, TransactionAggregator transactionAggregator,
-      TimeProvider timeProvider) {
+      long defaultScenarioRunIterationCount, ExecutionData scenarioData,
+      ExecutionData scenarioClassData, ExecutionData jobData,
+      TransactionAggregator transactionAggregator, TimeProvider timeProvider) {
     this.scenario = scenario;
     this.scenarioIterationCount = defaultScenarioIterationCount;
     this.scenarioRunIterationCount = defaultScenarioRunIterationCount;
+    this.scenarioData = scenarioData;
     this.scenarioClassData = scenarioClassData;
-    this.scenarioObjectData = scenarioObjectData;
+    this.jobData = jobData;
     this.transactionAggregator = transactionAggregator;
     this.timeProvider = timeProvider;
   }
@@ -33,7 +35,10 @@ public class ScenarioRunner implements Runnable {
   public void run() {
     TransactionRecorder transactionRecorder =
         new TransactionRecorderImpl(transactionAggregator, timeProvider);
-    scenario.initializeObject(scenarioClassData, scenarioObjectData, transactionRecorder);
+
+    scenario.initializeScenarioThread(scenarioData, scenarioClassData, jobData,
+        transactionRecorder);
+    
     for (long i = 0; i < scenarioIterationCount; ++i) {
       scenario.start();
       for (long j = 0; j < scenarioRunIterationCount; ++j) {
@@ -41,6 +46,7 @@ public class ScenarioRunner implements Runnable {
       }
       scenario.end();
     }
-    scenario.terminateObject();
+    
+    scenario.terminateScenarioThread(scenarioData, scenarioClassData, jobData);
   }
 }

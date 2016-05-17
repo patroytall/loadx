@@ -1,7 +1,7 @@
 package org.roy.loadx.api;
 
 public interface JobInitializer {
-	void initialize();
+	void initializeJob(ExecutionData jobData);
 
-	void terminate();
+	void terminateJob(ExecutionData jobData);
 }

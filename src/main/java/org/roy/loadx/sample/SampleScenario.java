@@ -2,9 +2,10 @@ package org.roy.loadx.sample;
 
 import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.api.Scenario;
+import org.roy.loadx.api.ScenarioClassInitializer;
 import org.roy.loadx.api.TransactionRecorder;
 
-public class SampleScenario implements Scenario {
+public class SampleScenario implements Scenario, ScenarioClassInitializer {
   public enum Data {
     URL, SCENARIO_TYPE
   };
@@ -17,14 +18,16 @@ public class SampleScenario implements Scenario {
   private String scenarioType;
 
   @Override
-  public void initializeObject(ExecutionData jobScenarioClassData,
-      ExecutionData jobScenarioObjectData, TransactionRecorder transactionRecorder) {
+  public void initializeScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
+      ExecutionData jobData, TransactionRecorder transactionRecorder) {
     this.transactionRecorder = transactionRecorder;
-    System.out.println("initialize - scenario class data - url: "
-        + jobScenarioClassData.getString(Data.URL.toString()));
     scenarioType =
-        ((String) jobScenarioObjectData.getObject(Data.SCENARIO_TYPE.toString())).toLowerCase();
-    System.out.println("initialize - scenario object data - scenario type: " + scenarioType);
+        ((ScenarioType) scenarioData.getObject(Data.SCENARIO_TYPE)).toString().toLowerCase();
+    println("initialize scenario thread - scenario data - scenario type: " + scenarioType);
+    println("initialize scenario thread - scenario class data - url: "
+        + scenarioClassData.getString(Data.URL));
+    println("initialize scenario thread - job data - project: "
+        + jobData.getString(SampleJobInitializer.Data.PROJECT));
   }
 
   @Override
@@ -50,12 +53,29 @@ public class SampleScenario implements Scenario {
   }
 
   @Override
-  public void terminateObject() {
-    println("terminate object - " + scenarioType);
+  public void terminateScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
+      ExecutionData jobData) {
+    println("terminate scenario thread - scenario type: " + scenarioType);
+    println("terminate scenario thread - scenario data - scenario type: "
+        + ((ScenarioType) scenarioData.getObject(Data.SCENARIO_TYPE)).toString().toLowerCase());
+    println("terminate scenario thread - scenario class data - url: "
+        + scenarioClassData.getString(Data.URL));
+    println("terminate scenario thread - job data - project: "
+        + jobData.getString(SampleJobInitializer.Data.PROJECT));
   }
-  
+
   private static void println(String str) {
     System.out.println(str);
     System.out.flush();
+  }
+
+  @Override
+  public void initializeScenarioClass(ExecutionData scenarioClassData, ExecutionData jobData) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void terminateScenarioClass(ExecutionData scenarioClassData, ExecutionData jobData) {
+    // TODO Auto-generated method stub
   }
 }

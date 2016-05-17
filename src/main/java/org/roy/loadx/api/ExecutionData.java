@@ -1,5 +1,8 @@
 package org.roy.loadx.api;
 
+/**
+ * Thread safe.
+ */
 public interface ExecutionData {
   ExecutionData put(Object key, Object value);
 
@@ -8,7 +11,13 @@ public interface ExecutionData {
    */
   Object getObject(Object key);
 
+  /**
+   * See {@link #getObject(Object)}
+   */
   String getString(Object key);
   
+  /**
+   * See {@link #getObject(Object)}
+   */
   Long getLong(Object key);
 }

@@ -3,7 +3,7 @@ package org.roy.loadx.api;
 public interface Job {
 	static final long DEFAULT_SCENARIO_ITERATION_COUNT = 1;
 	static final long DEFAULT_SCENARIO_RUN_ITERATION_COUNT = 1;
-	static final int DEFAULT_SCENARIO_USER_COUNT = 1;
+	static final int DEFAULT_SCENARIO_THREAD_COUNT = 1;
 
 	Object addScenario(Object scenarioClass);
 
@@ -15,12 +15,12 @@ public interface Job {
 	/**
 	 * Override the DEFAULT_SCENARIO_RUN_ITERATION_COUNT value
 	 */
-	void setDefaultScenarioRunIterationCount(int count);
+	void setDefaultScenarioRunIterationCount(long count);
 
 	/**
-	 * Override the DEFAULT_SCENARIO_USER_COUNT value
+	 * Override the DEFAULT_SCENARIO_THREAD_COUNT value
 	 */
-	void setDefaultScenarioUserCount(int count);
+	void setDefaultScenarioThreadCount(int count);
 
 	void setJobInitializer(JobInitializer jobInitializer);
 
@@ -28,7 +28,9 @@ public interface Job {
 
 	long getDefaultScenarioRunIterationCount();
 
-	int getDefaultScenarioUserCount();
-	
+	int getDefaultScenarioThreadCount();
+
+  ExecutionData getJobData();
+
   ExecutionData getScenarioClassData(Object scenarioClass);
 }
