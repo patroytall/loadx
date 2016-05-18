@@ -1,18 +1,21 @@
 with (new JavaImporter(org.roy.loadx.sample)) {
-  getJobData().put(SampleJobInitializer.Data.PROJECT, "sample job")
   setJobInitializer(new SampleJobInitializer())
+  setScenarioClassInitializer(SampleScenario, new SampleScenarioClassInitializer())
+
+  getJobData().put(SampleJobInitializer.Data.JOB, "job")
 
   setDefaultScenarioIterationCount(2)
   setDefaultScenarioRunIterationCount(2)
   setDefaultScenarioThreadCount(2)
 
-  getScenarioClassData(SampleScenario).put(SampleScenario.Data.URL, "http://somewhere.com")
+  getScenarioClassData(SampleScenario).put(SampleScenarioClassInitializer.Data.SCENARIO_CLASS, 
+    "scenario class")
 
   scenario = addScenario(SampleScenario)
   scenario.getScenarioData().put(SampleScenario.Data.SCENARIO_TYPE,
-    SampleScenario.ScenarioType.GREAT)
+    SampleScenario.ScenarioType.T1)
 
   scenario = addScenario(SampleScenario)
   scenario.getScenarioData().put(SampleScenario.Data.SCENARIO_TYPE, 
-    SampleScenario.ScenarioType.BETTER)
+    SampleScenario.ScenarioType.T2)
 }

@@ -4,8 +4,10 @@ import com.google.common.collect.FluentIterable;
 
 import org.roy.loadx.Configuration;
 import org.roy.loadx.EngineConfiguration;
+import org.roy.loadx.api.ExecutionData;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
+import org.roy.loadx.api.ScenarioClassInitializer;
 import org.roy.loadx.job.JobImpl;
 import org.roy.loadx.job.JobScenarioImpl;
 import org.roy.loadx.job.ScenarioRunner;
@@ -19,6 +21,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -86,7 +89,7 @@ public class LoadX {
     runJob(job);
   }
 
-  private void runJobIntialize(JobImpl jobImpl) {
+  private void invokeJobIntialize(JobImpl jobImpl) {
     JobInitializer jobInitializer = jobImpl.getJobInitializer();
     if (jobInitializer != null) {
       jobInitializer.initializeJob(jobImpl.getJobData());
@@ -96,7 +99,7 @@ public class LoadX {
   private void runJobTerminate(JobImpl jobImpl) {
     JobInitializer jobInitializer = jobImpl.getJobInitializer();
     if (jobInitializer != null) {
-      jobInitializer.terminateJob(jobImpl.getJobData());
+      jobInitializer.terminateJob();
     }
   }
 
@@ -110,11 +113,14 @@ public class LoadX {
 
   private void runJobScenario(JobScenarioImpl jobScenarioImpl, JobImpl jobImpl,
       ExecutorService executorService, TransactionAggregator transactionAggregator) {
+    ScenarioClassInitializer scenarioClassInitializer =
+        jobImpl.getScenarioClassInitializers().get(jobScenarioImpl.getScenarioClass());
     executorService.execute(
         new ScenarioRunner(getScenario(jobScenarioImpl), jobImpl.getDefaultScenarioIterationCount(),
             jobImpl.getDefaultScenarioRunIterationCount(), jobScenarioImpl.getScenarioData(),
             jobImpl.getScenarioClassData(jobScenarioImpl.getScenarioClass()), jobImpl.getJobData(),
-            transactionAggregator, configuration.getTimeProvider()));
+            scenarioClassInitializer, jobImpl.getJobInitializer(), transactionAggregator,
+            configuration.getTimeProvider()));
   }
 
   private void startTransactionPrintRunner() {
@@ -127,27 +133,30 @@ public class LoadX {
     transactionPrintRunner.start();
   }
 
-  private void runJob(JobImpl jobImpl) {
-    runJobIntialize(jobImpl);
+  private void invokeScenarioClassInitializerInitializes(JobImpl jobImpl) {
+    for (Map.Entry<Class<Scenario>, ScenarioClassInitializer> entry : jobImpl
+        .getScenarioClassInitializers().entrySet()) {
+      ExecutionData scenarioClassData = jobImpl.getScenarioClassData(entry.getKey());
+      entry.getValue().initializeScenarioClass(entry.getValue().getClass(), scenarioClassData,
+          jobImpl.getJobData());
+    }
+  }
 
+  private void invokeScenarioClassInitializerTerminates(JobImpl jobImpl) {
+    for (Map.Entry<Class<Scenario>, ScenarioClassInitializer> entry : jobImpl
+        .getScenarioClassInitializers().entrySet()) {
+      entry.getValue().terminateScenarioClass();
+    }
+  }
+
+  private void runJobScenarios(JobImpl jobImpl) {
     ExecutorService executorService =
         Executors.newFixedThreadPool(jobImpl.getDefaultScenarioThreadCount());
-
-    startTransactionPrintRunner();
-
-    // TODO: call once for each class
-    // if (scenario instanceof ClassInitializer) {
-    // ((ClassInitializer) scenario).initializeClass(classData, jobData);
-    // }
     infiniteJobScenarioIterator = FluentIterable.from(jobImpl.getJobScenarios()).cycle().iterator();
     for (int i = 0; i < jobImpl.getDefaultScenarioThreadCount(); ++i) {
       runJobScenario(infiniteJobScenarioIterator.next(), jobImpl, executorService,
           transactionAggregator);
     }
-    // TODO: call once for each class
-    // if (scenario instanceof ClassInitializer) {
-    // ((ClassInitializer) scenario).initializeClass(classData, jobData);
-    // }
 
     executorService.shutdown();
 
@@ -156,6 +165,18 @@ public class LoadX {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  private void runJob(JobImpl jobImpl) {
+    invokeJobIntialize(jobImpl);
+
+    invokeScenarioClassInitializerInitializes(jobImpl);
+
+    startTransactionPrintRunner();
+
+    runJobScenarios(jobImpl);
+
+    invokeScenarioClassInitializerTerminates(jobImpl);
 
     runJobTerminate(jobImpl);
 

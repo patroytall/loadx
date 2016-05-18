@@ -2,14 +2,14 @@ package org.roy.loadx.api;
 
 public interface Scenario {
   void initializeScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
-      ExecutionData jobData, TransactionRecorder transactionRecorder);
+      ExecutionData jobData, ScenarioClassInitializer scenarioClassInitializer,
+      JobInitializer jobInitializer, TransactionRecorder transactionRecorder);
 
   void run();
 
   void end();
 
-  void terminateScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
-      ExecutionData jobData);
+  void terminateScenarioThread();
 
   void start();
 }

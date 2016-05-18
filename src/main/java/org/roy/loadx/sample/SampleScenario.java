@@ -1,17 +1,18 @@
 package org.roy.loadx.sample;
 
 import org.roy.loadx.api.ExecutionData;
+import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.Scenario;
 import org.roy.loadx.api.ScenarioClassInitializer;
 import org.roy.loadx.api.TransactionRecorder;
 
-public class SampleScenario implements Scenario, ScenarioClassInitializer {
+public class SampleScenario implements Scenario {
   public enum Data {
-    URL, SCENARIO_TYPE
+    SCENARIO_TYPE
   };
 
   public enum ScenarioType {
-    GREAT, BETTER
+    T1, T2
   }
 
   private TransactionRecorder transactionRecorder;
@@ -19,15 +20,23 @@ public class SampleScenario implements Scenario, ScenarioClassInitializer {
 
   @Override
   public void initializeScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
-      ExecutionData jobData, TransactionRecorder transactionRecorder) {
+      ExecutionData jobData, ScenarioClassInitializer scenarioClassInitializer,
+      JobInitializer jobInitializer, TransactionRecorder transactionRecorder) {
     this.transactionRecorder = transactionRecorder;
+
     scenarioType =
         ((ScenarioType) scenarioData.getObject(Data.SCENARIO_TYPE)).toString().toLowerCase();
     println("initialize scenario thread - scenario data - scenario type: " + scenarioType);
+
     println("initialize scenario thread - scenario class data - url: "
-        + scenarioClassData.getString(Data.URL));
-    println("initialize scenario thread - job data - project: "
-        + jobData.getString(SampleJobInitializer.Data.PROJECT));
+        + scenarioClassData.getString(SampleScenarioClassInitializer.Data.SCENARIO_CLASS));
+    println("initialize scenario thread - job data - job: "
+        + jobData.getString(SampleJobInitializer.Data.JOB));
+
+    println("initialize scenario thread - scenario class initializer - simple name "
+        + ((SampleScenarioClassInitializer) scenarioClassInitializer).getSimpleName());
+    println("initialize scenario thread - job initializer - simple name "
+        + ((SampleJobInitializer) jobInitializer).getSimpleName());
   }
 
   @Override
@@ -53,29 +62,12 @@ public class SampleScenario implements Scenario, ScenarioClassInitializer {
   }
 
   @Override
-  public void terminateScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
-      ExecutionData jobData) {
+  public void terminateScenarioThread() {
     println("terminate scenario thread - scenario type: " + scenarioType);
-    println("terminate scenario thread - scenario data - scenario type: "
-        + ((ScenarioType) scenarioData.getObject(Data.SCENARIO_TYPE)).toString().toLowerCase());
-    println("terminate scenario thread - scenario class data - url: "
-        + scenarioClassData.getString(Data.URL));
-    println("terminate scenario thread - job data - project: "
-        + jobData.getString(SampleJobInitializer.Data.PROJECT));
   }
 
   private static void println(String str) {
     System.out.println(str);
     System.out.flush();
-  }
-
-  @Override
-  public void initializeScenarioClass(ExecutionData scenarioClassData, ExecutionData jobData) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public void terminateScenarioClass(ExecutionData scenarioClassData, ExecutionData jobData) {
-    // TODO Auto-generated method stub
   }
 }

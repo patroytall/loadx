@@ -5,6 +5,7 @@ import org.roy.loadx.api.Job;
 import org.roy.loadx.api.JobInitializer;
 import org.roy.loadx.api.JobScenario;
 import org.roy.loadx.api.Scenario;
+import org.roy.loadx.api.ScenarioClassInitializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ public class JobImpl implements Job {
   private final ExecutionData jobData = new ExecutionDataImpl();
   private final Map<Class<Scenario>, ExecutionData> scenarioClassDataMap = new HashMap<>();
   private final List<JobScenarioImpl> jobScenarios = new ArrayList<>();
+  private final Map<Class<Scenario>, ScenarioClassInitializer> scenarioClassInitializers =
+      new HashMap<>();
 
   private long defaultScenarioIterationCount = DEFAULT_SCENARIO_ITERATION_COUNT;
   private long defaultScenarioRunIterationCount = DEFAULT_SCENARIO_RUN_ITERATION_COUNT;
@@ -26,6 +29,7 @@ public class JobImpl implements Job {
   public JobScenario addScenario(Object scenarioClass) {
     Class<Scenario> javaScenarioClass =
         (Class<Scenario>) getClassFromJavascriptOrJavaClass(scenarioClass);
+
     JobScenarioImpl jobScenarioImpl = new JobScenarioImpl(javaScenarioClass);
     jobScenarios.add(jobScenarioImpl);
     return jobScenarioImpl;
@@ -103,5 +107,18 @@ public class JobImpl implements Job {
   @Override
   public ExecutionData getJobData() {
     return jobData;
+  }
+
+  @Override
+  public void setScenarioClassInitializer(Object scenarioClass,
+      ScenarioClassInitializer scenarioClassInitializer) {
+    @SuppressWarnings("unchecked")
+    Class<Scenario> javaScenarioClass =
+        (Class<Scenario>) getClassFromJavascriptOrJavaClass(scenarioClass);
+    scenarioClassInitializers.put(javaScenarioClass, scenarioClassInitializer);
+  }
+  
+  public Map<Class<Scenario>, ScenarioClassInitializer> getScenarioClassInitializers() {
+    return scenarioClassInitializers;
   }
 }

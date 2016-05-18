@@ -5,18 +5,23 @@ import org.roy.loadx.api.JobInitializer;
 
 public class SampleJobInitializer implements JobInitializer {
   public enum Data {
-    PROJECT
+    JOB
   }
-	@Override
+
+  @Override
 	public void initializeJob(ExecutionData jobData) {
-		println("initialize job - job data - project - " + jobData.getString(Data.PROJECT));
+		println("initialize job - job data - job - " + jobData.getString(Data.JOB));
 	}
 
 	@Override
-	public void terminateJob(ExecutionData jobData) {
-		println("terminate job - job data - project - " + jobData.getString(Data.PROJECT));
+	public void terminateJob() {
+    println("terminate job");
 	}
 
+  public String getSimpleName() {
+    return getClass().getSimpleName();
+  }
+  
   private static void println(String str) {
     System.out.println(str);
     System.out.flush();
