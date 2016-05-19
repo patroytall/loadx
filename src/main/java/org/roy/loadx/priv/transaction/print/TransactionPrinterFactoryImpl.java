@@ -1,11 +1,11 @@
 package org.roy.loadx.priv.transaction.print;
 
-import org.roy.loadx.priv.transaction.TransactionAggregator;
+import org.roy.loadx.priv.transaction.TransactionAggregatorImpl;
 
 public class TransactionPrinterFactoryImpl implements TransactionPrinterFactory {
 
   @Override
-  public TransactionPrinter getInstance(TransactionAggregator transactionAggregator) {
+  public TransactionPrinter getInstance(TransactionAggregatorImpl transactionAggregator) {
     return new TransactionPrinterImpl(transactionAggregator);
   }
 }

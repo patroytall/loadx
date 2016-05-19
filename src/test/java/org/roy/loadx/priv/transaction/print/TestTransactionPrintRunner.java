@@ -1,4 +1,4 @@
-package org.roy.loadx;
+package org.roy.loadx.priv.transaction.print;
 
 import org.roy.loadx.priv.transaction.print.TransactionPrintRunner;
 

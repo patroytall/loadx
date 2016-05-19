@@ -1,4 +1,4 @@
-package org.roy.loadx;
+package org.roy.loadx.priv;
 
 import static org.junit.Assert.assertEquals;
 

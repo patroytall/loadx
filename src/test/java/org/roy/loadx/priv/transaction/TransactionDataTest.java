@@ -1,9 +1,9 @@
-package org.roy.loadx.transaction;
+package org.roy.loadx.priv.transaction;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.roy.loadx.TestTimeProvider;
+import org.roy.loadx.priv.engine.TestTimeProvider;
 import org.roy.loadx.priv.transaction.TransactionData;
 
 public class TransactionDataTest {

@@ -1,4 +1,4 @@
-package org.roy.loadx.sample;
+package org.roy.loadx.pub.sample;
 
 import org.roy.loadx.pub.api.ExecutionData;
 import org.roy.loadx.pub.api.JobInitializer;

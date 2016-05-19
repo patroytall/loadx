@@ -1,7 +1,7 @@
 package org.roy.loadx.priv.job;
 
-import org.roy.loadx.priv.transaction.TimeProvider;
-import org.roy.loadx.priv.transaction.TransactionAggregator;
+import org.roy.loadx.priv.engine.TimeProvider;
+import org.roy.loadx.priv.transaction.TransactionAggregatorImpl;
 import org.roy.loadx.priv.transaction.TransactionRecorderImpl;
 import org.roy.loadx.pub.api.ExecutionData;
 import org.roy.loadx.pub.api.JobInitializer;
@@ -16,7 +16,7 @@ public class ScenarioRunner implements Runnable {
   private final ExecutionData scenarioData;
   private final ExecutionData scenarioClassData;
   private final ExecutionData jobData;
-  private final TransactionAggregator transactionAggregator;
+  private final TransactionAggregatorImpl transactionAggregator;
   private final TimeProvider timeProvider;
   private ScenarioClassInitializer scenarioClassInitializer;
   private JobInitializer jobInitializer;
@@ -25,7 +25,7 @@ public class ScenarioRunner implements Runnable {
       long defaultScenarioRunIterationCount, ExecutionData scenarioData,
       ExecutionData scenarioClassData, ExecutionData jobData,
       ScenarioClassInitializer scenarioClassInitializer, JobInitializer jobInitializer,
-      TransactionAggregator transactionAggregator, TimeProvider timeProvider) {
+      TransactionAggregatorImpl transactionAggregator, TimeProvider timeProvider) {
     this.scenario = scenario;
     this.scenarioIterationCount = defaultScenarioIterationCount;
     this.scenarioRunIterationCount = defaultScenarioRunIterationCount;

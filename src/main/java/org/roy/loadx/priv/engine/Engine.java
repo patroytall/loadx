@@ -16,7 +16,7 @@ import javax.script.ScriptEngineManager;
 import org.roy.loadx.priv.job.JobImpl;
 import org.roy.loadx.priv.job.JobScenarioImpl;
 import org.roy.loadx.priv.job.ScenarioRunner;
-import org.roy.loadx.priv.transaction.TransactionAggregator;
+import org.roy.loadx.priv.transaction.TransactionAggregatorImpl;
 import org.roy.loadx.priv.transaction.print.TransactionPrintRunner;
 import org.roy.loadx.priv.transaction.print.TransactionPrintRunnerThread;
 import org.roy.loadx.priv.transaction.print.TransactionPrinterFactory;
@@ -34,7 +34,7 @@ public class Engine {
   private Iterator<JobScenarioImpl> infiniteJobScenarioIterator;
 
   private Configuration configuration;
-  private TransactionAggregator transactionAggregator = new TransactionAggregator();
+  private TransactionAggregatorImpl transactionAggregator = new TransactionAggregatorImpl();
   private TransactionPrintRunner transactionPrintRunner;
 
   public void run(String[] args) {
@@ -113,7 +113,7 @@ public class Engine {
   }
 
   private void runJobScenario(JobScenarioImpl jobScenarioImpl, JobImpl jobImpl,
-      ExecutorService executorService, TransactionAggregator transactionAggregator) {
+      ExecutorService executorService, TransactionAggregatorImpl transactionAggregator) {
     ScenarioClassInitializer scenarioClassInitializer =
         jobImpl.getScenarioClassInitializers().get(jobScenarioImpl.getScenarioClass());
     executorService.execute(

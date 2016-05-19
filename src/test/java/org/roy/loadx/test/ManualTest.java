@@ -1,4 +1,4 @@
-package org.roy.loadx;
+package org.roy.loadx.test;
 
 public interface ManualTest {
 }

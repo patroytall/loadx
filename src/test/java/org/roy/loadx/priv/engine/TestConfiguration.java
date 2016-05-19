@@ -1,8 +1,7 @@
-package org.roy.loadx;
+package org.roy.loadx.priv.engine;
 
 import org.roy.loadx.priv.engine.Configuration;
-import org.roy.loadx.priv.transaction.TimeProvider;
-import org.roy.loadx.priv.transaction.TimeProviderImpl;
+import org.roy.loadx.priv.transaction.print.TestTransactionPrintRunner;
 import org.roy.loadx.priv.transaction.print.TransactionPrintRunner;
 
 public class TestConfiguration implements Configuration {
