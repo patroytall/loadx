@@ -1,8 +1,9 @@
 package org.roy.loadx;
 
-import org.roy.loadx.transaction.TimeProvider;
-import org.roy.loadx.transaction.TimeProviderImpl;
-import org.roy.loadx.transaction.print.TransactionPrintRunner;
+import org.roy.loadx.priv.engine.Configuration;
+import org.roy.loadx.priv.transaction.TimeProvider;
+import org.roy.loadx.priv.transaction.TimeProviderImpl;
+import org.roy.loadx.priv.transaction.print.TransactionPrintRunner;
 
 public class TestConfiguration implements Configuration {
   private TimeProvider timeProvider = new TimeProviderImpl();

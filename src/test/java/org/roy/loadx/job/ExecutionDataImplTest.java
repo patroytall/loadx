@@ -3,6 +3,7 @@ package org.roy.loadx.job;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.roy.loadx.priv.job.ExecutionDataImpl;
 
 public class ExecutionDataImplTest {
   private static final String KEY = "key";

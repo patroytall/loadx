@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.roy.loadx.TestTimeProvider;
+import org.roy.loadx.priv.transaction.TransactionAggregator;
 
 public class TransactionAggregatorTest {
 	@Test

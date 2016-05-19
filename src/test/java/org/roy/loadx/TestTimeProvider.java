@@ -1,6 +1,6 @@
 package org.roy.loadx;
 
-import org.roy.loadx.transaction.TimeProvider;
+import org.roy.loadx.priv.transaction.TimeProvider;
 
 public class TestTimeProvider implements TimeProvider {
 	public static final double TIME_DELTA = 1e-12;

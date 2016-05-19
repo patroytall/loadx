@@ -1,6 +1,6 @@
 package org.roy.loadx;
 
-import org.roy.loadx.transaction.print.TransactionPrintRunner;
+import org.roy.loadx.priv.transaction.print.TransactionPrintRunner;
 
 public class TestTransactionPrintRunner implements TransactionPrintRunner {
 	@Override

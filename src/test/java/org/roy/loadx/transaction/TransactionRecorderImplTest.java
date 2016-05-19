@@ -2,6 +2,9 @@ package org.roy.loadx.transaction;
 
 import org.junit.Test;
 import org.roy.loadx.TestTimeProvider;
+import org.roy.loadx.priv.transaction.TimeProvider;
+import org.roy.loadx.priv.transaction.TransactionAggregator;
+import org.roy.loadx.priv.transaction.TransactionRecorderImpl;
 
 import mockit.Expectations;
 import mockit.Mocked;

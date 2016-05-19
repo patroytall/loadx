@@ -3,6 +3,7 @@ package org.roy.loadx;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.roy.loadx.priv.Util;
 
 public class TestUtil {
 
