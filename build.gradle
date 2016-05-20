@@ -62,6 +62,7 @@ if (hasProperty("artifactory_contextUrl")) {
     publications {
       mavenJava(MavenPublication) {
         from project.components.java
+        artifactId = "loadx"
         artifact project.sourceJar {
           classifier "sources"
         }
