@@ -27,6 +27,6 @@ artifacts {
 
 test {
   useJUnit {
-    excludeCategories "org.roy.loadx.ManualTest"
+    excludeCategories "org.roy.loadx.test.ManualTest"
   }
 }
