@@ -6,16 +6,15 @@ repositories {
   jcenter()
 }
 
-configurations {
-  compile {
-    transitive = true
-  }
-}
 dependencies {
   compile "commons-lang:commons-lang:2.6"
   compile "com.google.guava:guava:19.0"
   compile "com.sparkjava:spark-core:2.5"
   compile "commons-cli:commons-cli:1.3.1"
+  
+  runtime "commons-cli:commons-cli:1.3.1" {
+    transitive = true
+  }
 
   testCompile 'org.mockito:mockito-core:1.10.19'
   testCompile "junit:junit:4.12"
