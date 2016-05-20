@@ -27,7 +27,6 @@ import org.roy.loadx.pub.api.Scenario;
 import org.roy.loadx.pub.api.ScenarioClassInitializer;
 import org.roy.loadx.pub.invocation.LoadX;
 
-import com.beust.jcommander.JCommander;
 import com.google.common.collect.FluentIterable;
 
 public class Engine {
@@ -43,8 +42,7 @@ public class Engine {
 
   public void run(String[] args, Configuration configuration) {
     this.configuration = configuration;
-    ArgumentParser argumentParser = new ArgumentParser();
-    new JCommander(argumentParser, args);
+    ArgumentsParser argumentParser = new ArgumentsParser(args);
 
     WebServer webServer = null;
     if (argumentParser.getWeb()) {
