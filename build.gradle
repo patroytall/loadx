@@ -1,3 +1,12 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0"
+  }
+}
+
 apply plugin: "java"
 apply plugin: "maven-publish"
 apply plugin: "eclipse"
@@ -11,10 +20,6 @@ dependencies {
   compile "com.google.guava:guava:19.0"
   compile "com.sparkjava:spark-core:2.5"
   compile "commons-cli:commons-cli:1.3.1"
-
-  runtime("commons-cli:commons-cli:1.3.1") {
-    transitive = true
-  }
 
   testCompile 'org.mockito:mockito-core:1.10.19'
   testCompile "junit:junit:4.12"
@@ -32,5 +37,35 @@ artifacts {
 test {
   useJUnit {
     excludeCategories "org.roy.loadx.test.ManualTest"
+  }
+}
+
+if (hasProperty("artifactory_contextUrl")) {
+  apply plugin: "com.jfrog.artifactory"
+
+  artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+      repository {
+        repoKey = "${artifactory_repoKey}"
+        username = "${artifactory_username}"
+        password = "${artifactory_password}"
+        maven = true
+      }
+      defaults {
+        publications ('mavenJava')
+      }
+    }
+  }
+
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from project.components.java
+        artifact project.sourceJar {
+          classifier "sources"
+        }
+      }
+    }
   }
 }
