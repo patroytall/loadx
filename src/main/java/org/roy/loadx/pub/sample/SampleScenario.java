@@ -12,7 +12,7 @@ public class SampleScenario implements Scenario {
   };
 
   public enum ScenarioType {
-    T1, T2
+    TYPE1, TYPE2
   }
 
   private TransactionRecorder transactionRecorder;

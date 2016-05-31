@@ -1,4 +1,4 @@
-with (new JavaImporter(org.roy.loadx.sample)) {
+with (new JavaImporter(org.roy.loadx.pub.sample)) {
   setJobInitializer(new SampleJobInitializer())
   setScenarioClassInitializer(SampleScenario, new SampleScenarioClassInitializer())
 
@@ -13,9 +13,9 @@ with (new JavaImporter(org.roy.loadx.sample)) {
 
   scenario = addScenario(SampleScenario)
   scenario.getScenarioData().put(SampleScenario.Data.SCENARIO_TYPE,
-    SampleScenario.ScenarioType.T1)
+    SampleScenario.ScenarioType.TYPE1)
 
   scenario = addScenario(SampleScenario)
   scenario.getScenarioData().put(SampleScenario.Data.SCENARIO_TYPE, 
-    SampleScenario.ScenarioType.T2)
+    SampleScenario.ScenarioType.TYPE2)
 }
