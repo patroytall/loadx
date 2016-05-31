@@ -27,6 +27,9 @@ public class JobImpl implements Job {
   @SuppressWarnings("unchecked")
   @Override
   public JobScenario addScenario(Object scenarioClass) {
+    if (scenarioClass == null) {
+      throw new RuntimeException("invalid null scenario class");
+    }
     Class<Scenario> javaScenarioClass =
         (Class<Scenario>) getClassFromJavascriptOrJavaClass(scenarioClass);
 

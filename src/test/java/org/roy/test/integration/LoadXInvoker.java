@@ -14,6 +14,6 @@ public class LoadXInvoker {
 
   @Test
   public void invokeLongRunning() {
-    LoadX.main(new String[] { "sample/long-running_job.js" });
+    LoadX.main(new String[] { "long-running_job.js" });
   }
 }
