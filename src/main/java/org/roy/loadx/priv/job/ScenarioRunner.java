@@ -7,7 +7,6 @@ import org.roy.loadx.pub.api.ExecutionData;
 import org.roy.loadx.pub.api.JobInitializer;
 import org.roy.loadx.pub.api.Scenario;
 import org.roy.loadx.pub.api.ScenarioClassInitializer;
-import org.roy.loadx.pub.api.TransactionRecorder;
 
 public class ScenarioRunner implements Runnable {
   private final Scenario scenario;
@@ -40,18 +39,23 @@ public class ScenarioRunner implements Runnable {
 
   @Override
   public void run() {
-    TransactionRecorder transactionRecorder =
+    TransactionRecorderImpl transactionRecorderImpl =
         new TransactionRecorderImpl(transactionAggregator, timeProvider);
 
     scenario.initializeScenarioThread(scenarioData, scenarioClassData, jobData,
-        scenarioClassInitializer, jobInitializer, transactionRecorder);
+        scenarioClassInitializer, jobInitializer, transactionRecorderImpl);
     
-    for (long i = 0; i < scenarioIterationCount; ++i) {
-      scenario.start();
-      for (long j = 0; j < scenarioRunIterationCount; ++j) {
-        scenario.run();
+    try {
+      for (long i = 0; i < scenarioIterationCount; ++i) {
+        scenario.start();
+        for (long j = 0; j < scenarioRunIterationCount; ++j) {
+          scenario.run();
+        }
+        scenario.end();
       }
-      scenario.end();
+    } catch (Throwable t) {
+      transactionRecorderImpl.abort();
+      t.printStackTrace();
     }
     
     scenario.terminateScenarioThread();

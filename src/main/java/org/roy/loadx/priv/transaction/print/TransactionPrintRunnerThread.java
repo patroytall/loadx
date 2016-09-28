@@ -25,17 +25,17 @@ public class TransactionPrintRunnerThread extends Thread implements TransactionP
         }
       }
     }
-    printTransactions();
   }
 
-  private void printTransactions() {
+  private synchronized void printTransactions() {
     transactionPrinter.print();
   }
 
   @Override
-  public void done() {
+  public synchronized void done() {
     done = true;
     if (runThread != null) {
+      printTransactions();
       runThread.interrupt();
     }
   }

@@ -7,10 +7,11 @@ import org.roy.loadx.priv.engine.TestTimeProvider;
 import org.roy.loadx.priv.transaction.TransactionData;
 
 public class TransactionDataTest {
-	@Test
-	public void getAverageDurationMilli() {
-		final long DURATION_MILLI = 1000;
-		TransactionData sut = new TransactionData();
-		assertEquals(DURATION_MILLI, sut.add(DURATION_MILLI).getAverageDurationMilli(), TestTimeProvider.TIME_DELTA);
-	}
+  @Test
+  public void getAverageDurationMilli() {
+    final long DURATION_MILLI = 1000;
+    TransactionData sut = new TransactionData();
+    assertEquals(DURATION_MILLI, sut.addPass(DURATION_MILLI).getAverageDurationMilli(),
+        TestTimeProvider.TIME_DELTA);
+  }
 }

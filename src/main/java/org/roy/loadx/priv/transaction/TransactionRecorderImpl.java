@@ -9,6 +9,7 @@ public class TransactionRecorderImpl implements TransactionRecorder {
 
 	private long startTimeNano;
 	private String name;
+	private boolean transactionRunning = false;
 
 	public TransactionRecorderImpl(TransactionAggregator transactionAggregator, TimeProvider timeProvider) {
 		this.transactionAggregator = transactionAggregator;
@@ -19,12 +20,24 @@ public class TransactionRecorderImpl implements TransactionRecorder {
 	public void start(String name) {
 		this.name = name;
 		startTimeNano = timeProvider.nanoTime();
+		transactionRunning = true;
 	}
 
 	@Override
 	public void end() {
+	  if (!transactionRunning) {
+	    throw new RuntimeException("transaction not running");
+	  }
 		long endTimeNano = timeProvider.nanoTime();
 		double durationMilli = (endTimeNano - startTimeNano) / 1e6;
-		transactionAggregator.addTransaction(name, durationMilli);
+		transactionAggregator.addPass(name, durationMilli);
+    transactionRunning = false;
+	}
+	
+	public void abort() {
+	  if (transactionRunning) {
+	    transactionAggregator.addFail(name);
+	  }
+	  transactionRunning = false;
 	}
 }

@@ -9,15 +9,26 @@ import java.util.Map;
 public class TransactionAggregatorImpl implements TransactionAggregator {
 	private final Map<String, TransactionData> transactions = new HashMap<>();
 
-	public synchronized void addTransaction(String name, double durationMilli) {
-		TransactionData transactionData = transactions.get(name);
-		if (transactionData == null) {
-			transactionData = new TransactionData();
-			transactions.put(name, transactionData);
-		}
-		transactionData.add(durationMilli);
+	@Override
+	public synchronized void addPass(String name, double durationMilli) {
+	  getOrCreateTransactionData(name).addPass(durationMilli);
 	}
 
+	@Override
+	public synchronized void addFail(String name) {
+	  getOrCreateTransactionData(name).addFail();
+	}
+
+	private TransactionData getOrCreateTransactionData(String name) {
+    TransactionData transactionData = transactions.get(name);
+    if (transactionData == null) {
+      transactionData = new TransactionData();
+      transactions.put(name, transactionData);
+    }	  
+    return transactionData;
+	}
+	
+  @Override
 	public synchronized List<String> getSortedTransactionNames() {
 		List<String> transactionNames = new ArrayList<>();
 		transactionNames.addAll(transactions.keySet());
@@ -25,6 +36,7 @@ public class TransactionAggregatorImpl implements TransactionAggregator {
 		return transactionNames;
 	}
 
+  @Override
 	public synchronized TransactionData getTransactionData(String name) {
 		return new TransactionData(transactions.get(name));
 	}

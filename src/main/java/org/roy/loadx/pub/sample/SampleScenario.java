@@ -16,17 +16,19 @@ public class SampleScenario implements Scenario {
   }
 
   private TransactionRecorder transactionRecorder;
-  private String scenarioType;
+  private ScenarioType scenarioType;
+  private long runCount = 0;
 
   @Override
-  public void initializeScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
-      ExecutionData jobData, ScenarioClassInitializer scenarioClassInitializer,
-      JobInitializer jobInitializer, TransactionRecorder transactionRecorder) {
+  public void initializeScenarioThread(ExecutionData scenarioData,
+      ExecutionData scenarioClassData, ExecutionData jobData,
+      ScenarioClassInitializer scenarioClassInitializer, JobInitializer jobInitializer,
+      TransactionRecorder transactionRecorder) {
     this.transactionRecorder = transactionRecorder;
 
-    scenarioType =
-        ((ScenarioType) scenarioData.getObject(Data.SCENARIO_TYPE)).toString().toLowerCase();
-    println("initialize scenario thread - scenario data - scenario type: " + scenarioType);
+    scenarioType = ((ScenarioType) scenarioData.getObject(Data.SCENARIO_TYPE));
+    println("initialize scenario thread - scenario data - scenario type: "
+        + scenarioType.toString().toLowerCase());
 
     println("initialize scenario thread - scenario class data - url: "
         + scenarioClassData.getString(SampleScenarioClassInitializer.Data.SCENARIO_CLASS));
@@ -41,23 +43,28 @@ public class SampleScenario implements Scenario {
 
   @Override
   public void start() {
-    action("start");
+    action("start", false);
   }
 
   @Override
   public void run() {
-    action("run");
+    runCount++;
+    boolean fail = scenarioType == ScenarioType.TYPE2 && runCount % 2 == 0;
+    action("run", fail);
   }
 
   @Override
   public void end() {
-    action("end");
+    action("end", false);
   }
 
-  private void action(String name) {
+  private void action(String name, boolean fail) {
     String transactionName = name + " - " + scenarioType;
     transactionRecorder.start(transactionName);
     println(transactionName);
+    if (fail) {
+      throw new RuntimeException("sample transaction failure");      
+    }
     transactionRecorder.end();
   }
 

@@ -20,7 +20,7 @@ public class TransactionPrinterImplManualTest {
     when(transactionData.getAverageDurationMilli()).thenReturn(1d);
     when(transactionData.getMinDurationMilli()).thenReturn(1d);
     when(transactionData.getMaxDurationMilli()).thenReturn(1d);
-    when(transactionData.getTransactionCount()).thenReturn(1l);
+    when(transactionData.getPassCount()).thenReturn(1l);
     return transactionData;
   }
   

@@ -7,51 +7,46 @@ import org.roy.loadx.priv.transaction.TransactionData;
 import java.util.ArrayList;
 
 public class TransactionPrinterImpl implements TransactionPrinter {
-  static private class TransactionDataSummaryEntry {
-    private final String transactionName;
-    private final String average;
-    private final String count;
 
-    public TransactionDataSummaryEntry(String transactionName, String average, String count) {
+  /**
+   * Immutable.
+   */
+  static private class TransactionDataSummaryEntry {
+    public final String transactionName;
+    public final String average;
+    public final String pass;
+    public final String fail;
+
+    public TransactionDataSummaryEntry(String transactionName, String average, String pass,
+        String fail) {
       this.transactionName = transactionName;
       this.average = average;
-      this.count = count;
-    }
-
-    public String getTransactionName() {
-      return transactionName;
-    }
-
-    public String getAverage() {
-      return average;
-    }
-
-    public String getCount() {
-      return count;
+      this.pass = pass;
+      this.fail = fail;
     }
   }
 
   static private class TransactionDataSummary {
     static private final String TRANSACTION_HEADER = "Transaction";
     static private final String AVERAGE_HEADER = "Average";
-    static private final String COUNT_HEADER = "Count";
+    static private final String PASS_HEADER = "Pass";
+    static private final String FAIL_HEADER = "Fail";
     static private final int MAX_ROW_WIDTH = 120;
     static private final int CONSOLE_MAX_ROW_WIDTH = MAX_ROW_WIDTH - 1;
-    static private final String ROW_FORMAT = "%%-%ds | %%10s | %%10s%n";
+    static private final String ROW_FORMAT = "%%-%ds | %%10s | %%10s | %%10s%n";
     static private final int PRE_ALLOCATED_SPACE_PER_ROW = 26;
     static private final String ELLIPSIS = "...";
 
     private int longestTransactionNameLength;
-    private ArrayList<TransactionDataSummaryEntry> rows;
+    private ArrayList<TransactionDataSummaryEntry> rows = new ArrayList<>();
 
     public TransactionDataSummary() {
       longestTransactionNameLength = TRANSACTION_HEADER.length();
-      rows = new ArrayList<>();
     }
 
     public void add(TransactionDataSummaryEntry entry) {
       rows.add(entry);
-      int transactionNameLength = entry.getTransactionName().length();
+      int transactionNameLength = entry.transactionName.length();
       if (transactionNameLength > longestTransactionNameLength) {
         longestTransactionNameLength = transactionNameLength;
       }
@@ -62,13 +57,15 @@ public class TransactionPrinterImpl implements TransactionPrinter {
       int transactionColumnWidth = getTransactionColumnWidth();
       String rowFormat = computeDynamicFormatString();
       StringBuilder sb = new StringBuilder();
-      sb.append(String.format(rowFormat, TRANSACTION_HEADER, AVERAGE_HEADER, COUNT_HEADER));
+      sb.append(String.format(rowFormat, TRANSACTION_HEADER, AVERAGE_HEADER, PASS_HEADER,
+          FAIL_HEADER));
       sb.append(String.format(rowFormat, StringUtils.repeat("=", transactionColumnWidth),
           StringUtils.repeat("=", AVERAGE_HEADER.length()),
-          StringUtils.repeat("=", COUNT_HEADER.length())));
+          StringUtils.repeat("=", PASS_HEADER.length()),
+          StringUtils.repeat("=", FAIL_HEADER.length())));
       for (TransactionDataSummaryEntry entry : rows) {
-        sb.append(String.format(rowFormat, getTransactionDisplayName(entry.getTransactionName()),
-            entry.getAverage(), entry.getCount()));
+        sb.append(String.format(rowFormat, getTransactionDisplayName(entry.transactionName),
+            entry.average, entry.pass, entry.fail));
       }
       return sb.toString();
     }
@@ -84,9 +81,8 @@ public class TransactionPrinterImpl implements TransactionPrinter {
 
     private String getTransactionDisplayName(String transactionName) {
       int transactionColumnWidth = getTransactionColumnWidth();
-      return transactionName.length() > transactionColumnWidth
-          ? transactionName.substring(0, transactionColumnWidth - ELLIPSIS.length()) + ELLIPSIS
-          : transactionName;
+      return transactionName.length() > transactionColumnWidth ? transactionName.substring(0,
+          transactionColumnWidth - ELLIPSIS.length()) + ELLIPSIS : transactionName;
     }
   }
 
@@ -108,8 +104,9 @@ public class TransactionPrinterImpl implements TransactionPrinter {
       TransactionData transactionData = transactionAggregator.getTransactionData(name);
       long roundedAverage = Math.round(transactionData.getAverageDurationMilli());
       String average = String.valueOf(roundedAverage);
-      String count = String.valueOf(transactionData.getTransactionCount());
-      summary.add(new TransactionDataSummaryEntry(name, average, count));
+      String pass = String.valueOf(transactionData.getPassCount());
+      String fail = String.valueOf(transactionData.getFailCount());
+      summary.add(new TransactionDataSummaryEntry(name, average, pass, fail));
     }
     println(summary.toString());
   }
