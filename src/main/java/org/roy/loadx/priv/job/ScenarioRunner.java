@@ -15,10 +15,9 @@ public class ScenarioRunner implements Runnable {
   private final ExecutionData scenarioData;
   private final ExecutionData scenarioClassData;
   private final ExecutionData jobData;
-  private final TransactionAggregatorImpl transactionAggregator;
-  private final TimeProvider timeProvider;
-  private ScenarioClassInitializer scenarioClassInitializer;
-  private JobInitializer jobInitializer;
+  private final ScenarioClassInitializer scenarioClassInitializer;
+  private final JobInitializer jobInitializer;
+  private final TransactionRecorderImpl transactionRecorderImpl;
 
   public ScenarioRunner(Scenario scenario, long defaultScenarioIterationCount,
       long defaultScenarioRunIterationCount, ExecutionData scenarioData,
@@ -33,31 +32,65 @@ public class ScenarioRunner implements Runnable {
     this.jobData = jobData;
     this.scenarioClassInitializer = scenarioClassInitializer;
     this.jobInitializer = jobInitializer;
-    this.transactionAggregator = transactionAggregator;
-    this.timeProvider = timeProvider;
+    transactionRecorderImpl = new TransactionRecorderImpl(transactionAggregator, timeProvider);
+  }
+
+  private void handleStepFailure(String step, Exception e) {
+    System.err.println("scenario step " + step + " failed");
+    if (transactionRecorderImpl.transactionRunning()) {
+      System.err.println("transaction " + transactionRecorderImpl.getTransactionName()
+          + " aborted");
+    }
+    e.printStackTrace();
+    System.err.flush();
+
+    transactionRecorderImpl.abort();
+  }
+
+  private boolean runStartStep() {
+    try {
+      scenario.start();
+    } catch (Exception e) {
+      handleStepFailure("start", e);
+      return false;
+    }
+    return true;
+  }
+
+  private void runRunStep() {
+    try {
+      scenario.run();
+    } catch (Exception e) {
+      handleStepFailure("run", e);
+    }
+  }
+
+  private void runEndStep() {
+    try {
+      scenario.end();
+    } catch (Exception e) {
+      handleStepFailure("end", e);
+    }
+  }
+
+  private void runScenario() {
+    for (long i = 0; i < scenarioIterationCount; ++i) {
+      if (runStartStep()) {
+        for (long j = 0; j < scenarioRunIterationCount; ++j) {
+          runRunStep();
+        }
+        runEndStep();
+      }
+    }
   }
 
   @Override
   public void run() {
-    TransactionRecorderImpl transactionRecorderImpl =
-        new TransactionRecorderImpl(transactionAggregator, timeProvider);
-
     scenario.initializeScenarioThread(scenarioData, scenarioClassData, jobData,
         scenarioClassInitializer, jobInitializer, transactionRecorderImpl);
-    
-    try {
-      for (long i = 0; i < scenarioIterationCount; ++i) {
-        scenario.start();
-        for (long j = 0; j < scenarioRunIterationCount; ++j) {
-          scenario.run();
-        }
-        scenario.end();
-      }
-    } catch (Throwable t) {
-      transactionRecorderImpl.abort();
-      t.printStackTrace();
-    }
-    
+
+    runScenario();
+
     scenario.terminateScenarioThread();
   }
 }

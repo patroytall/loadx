@@ -59,7 +59,7 @@ public class SampleScenario implements Scenario {
   }
 
   private void action(String name, boolean fail) {
-    String transactionName = name + " - " + scenarioType;
+    String transactionName = name + "-" + scenarioType.toString().toLowerCase();
     transactionRecorder.start(transactionName);
     println(transactionName);
     if (fail) {
