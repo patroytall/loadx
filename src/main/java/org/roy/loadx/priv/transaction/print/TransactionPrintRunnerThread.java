@@ -15,6 +15,15 @@ public class TransactionPrintRunnerThread extends Thread implements TransactionP
   @Override
   public void run() {
     runThread = Thread.currentThread();
+    try {
+      runThread();
+    } catch (Throwable t) {
+      throw new RuntimeException(
+          "Transaction printer aborted. Transactions will not be printed anymore.", t);
+    }
+  }
+
+  private void runThread() {
     while (!done) {
       printTransactions();
       try {
