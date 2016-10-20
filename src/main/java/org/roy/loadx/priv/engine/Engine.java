@@ -42,6 +42,10 @@ public class Engine {
 
   public void run(String[] args, Configuration configuration) {
     this.configuration = configuration;
+    parseArgumentsAndRun(args);
+  }
+
+  private void parseArgumentsAndRun(String[] args) {
     ArgumentsParser argumentParser = new ArgumentsParser(args);
 
     WebServer webServer = null;
@@ -114,20 +118,20 @@ public class Engine {
       ExecutorService executorService, TransactionAggregatorImpl transactionAggregator) {
     ScenarioClassInitializer scenarioClassInitializer =
         jobImpl.getScenarioClassInitializers().get(jobScenarioImpl.getScenarioClass());
-    executorService.execute(
-        new ScenarioRunner(getScenario(jobScenarioImpl), jobImpl.getDefaultScenarioIterationCount(),
-            jobImpl.getDefaultScenarioRunIterationCount(), jobScenarioImpl.getScenarioData(),
-            jobImpl.getScenarioClassData(jobScenarioImpl.getScenarioClass()), jobImpl.getJobData(),
-            scenarioClassInitializer, jobImpl.getJobInitializer(), transactionAggregator,
-            configuration.getTimeProvider()));
+    executorService.execute(new ScenarioRunner(getScenario(jobScenarioImpl), jobImpl
+        .getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
+        jobScenarioImpl.getScenarioData(), jobImpl.getScenarioClassData(jobScenarioImpl
+            .getScenarioClass()), jobImpl.getJobData(), scenarioClassInitializer, jobImpl
+            .getJobInitializer(), transactionAggregator, configuration.getTimeProvider()));
   }
 
   private void startTransactionPrintRunner() {
     transactionPrintRunner = configuration.getTransactionPrintRunner();
     if (transactionPrintRunner == null) {
       TransactionPrinterFactory transactionPrinterFactory = new TransactionPrinterFactoryImpl();
-      transactionPrintRunner = new TransactionPrintRunnerThread(
-          transactionPrinterFactory.getInstance(transactionAggregator));
+      transactionPrintRunner =
+          new TransactionPrintRunnerThread(
+              transactionPrinterFactory.getInstance(transactionAggregator));
     }
     transactionPrintRunner.start();
   }
@@ -151,7 +155,8 @@ public class Engine {
   private void runJobScenarios(JobImpl jobImpl) {
     ExecutorService executorService =
         Executors.newFixedThreadPool(jobImpl.getDefaultScenarioThreadCount());
-    infiniteJobScenarioIterator = FluentIterable.from(jobImpl.getJobScenarios()).cycle().iterator();
+    infiniteJobScenarioIterator =
+        FluentIterable.from(jobImpl.getJobScenarios()).cycle().iterator();
     for (int i = 0; i < jobImpl.getDefaultScenarioThreadCount(); ++i) {
       runJobScenario(infiniteJobScenarioIterator.next(), jobImpl, executorService,
           transactionAggregator);
@@ -165,7 +170,7 @@ public class Engine {
       throw new RuntimeException(e);
     }
   }
-  
+
   private void runJob(JobImpl jobImpl) {
     invokeJobIntialize(jobImpl);
 

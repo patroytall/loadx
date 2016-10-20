@@ -17,6 +17,10 @@ public class TablePrinter {
   }
 
   public void addRow(String... columnValues) {
+    if (columnValues.length != headerRow.size()) {
+      throw new RuntimeException("row number of columns " + columnValues.length
+          + " much match header number of columns " + headerRow.size());
+    }
     List<String> dataRow = new ArrayList<>();
     for (String columnValue : columnValues) {
       dataRow.add(columnValue);
@@ -50,7 +54,7 @@ public class TablePrinter {
     boolean first = true;
     for (int columnMaxWidth : columnMaxWidths) {
       if (!first) {
-        rowFormat.append(separator);        
+        rowFormat.append(separator);
       }
       rowFormat.append("%" + (first ? "-" : "") + columnMaxWidth + "s");
       first = false;
@@ -83,7 +87,7 @@ public class TablePrinter {
     setColumnMaxWidths();
 
     printTableFirstAndLastRow();
-    
+
     String separatedRowFormat = getRowFormat(" | ");
     printRow(separatedRowFormat, headerRow);
     printRow(getRowFormat("-|-"), getLayoutRow());
@@ -91,7 +95,7 @@ public class TablePrinter {
     for (List<String> dataRow : dataRows) {
       printRow(separatedRowFormat, dataRow);
     }
-    
+
     if (dataRows.size() > 0) {
       printTableFirstAndLastRow();
     }

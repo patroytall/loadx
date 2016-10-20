@@ -13,14 +13,17 @@ public class TransactionPrinterImpl implements TransactionPrinter {
 
   @Override
   public void print() {
-    TablePrinter tablePrinter = new TablePrinter("Transaction", "Average", "Pass", "Fail");
+    TablePrinter tablePrinter =
+        new TablePrinter("Transaction", "Min", "Max", "Average", "Pass", "Fail");
     for (String name : transactionAggregator.getSortedTransactionNames()) {
       TransactionData transactionData = transactionAggregator.getTransactionData(name);
-      long roundedAverage = Math.round(transactionData.getAverageDurationMilli());
+      long roundedAverage = (long) Math.ceil(transactionData.getAverageDurationMilli());
+      String min = String.valueOf(transactionData.getMinDurationMilli());
+      String max = String.valueOf(transactionData.getMaxDurationMilli());
       String average = String.valueOf(roundedAverage);
       String pass = String.valueOf(transactionData.getPassCount());
       String fail = String.valueOf(transactionData.getFailCount());
-      tablePrinter.addRow(name, average, pass, fail);
+      tablePrinter.addRow(name, min, max, average, pass, fail);
     }
     tablePrinter.print();
   }
