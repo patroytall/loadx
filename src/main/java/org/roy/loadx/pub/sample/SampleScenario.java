@@ -62,10 +62,19 @@ public class SampleScenario implements Scenario {
     String transactionName = name + "-" + scenarioType.toString().toLowerCase();
     transactionRecorder.start(transactionName);
     println(transactionName);
+    sleep();
     if (fail) {
-      throw new RuntimeException("sample transaction failure");      
+      throw new RuntimeException("sample transaction failure");
     }
     transactionRecorder.end();
+  }
+
+  private void sleep() {
+    try {
+      Thread.sleep((long) ((Math.random() * 1000) + 1));
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

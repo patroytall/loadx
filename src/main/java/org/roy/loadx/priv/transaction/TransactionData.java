@@ -1,61 +1,67 @@
 package org.roy.loadx.priv.transaction;
 
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
+
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * Thread safe.
  */
 public class TransactionData {
-  private long passCount = 0;
-  private long failCount = 0;
-  private double averageDurationMilli = 0;
-  private double minDurationMilli = Double.MAX_VALUE;
-  private double maxDurationMilli = Double.MIN_VALUE;
+  private static final int WINDOW_SIZE = 2048;
+
+  private final SynchronizedDescriptiveStatistics descriptiveStatistics;
+  private final AtomicLong failCount;
 
   public TransactionData() {
-  }
-  
-  public TransactionData(TransactionData transactionData) {
-    passCount = transactionData.passCount;
-    failCount = transactionData.failCount;
-    averageDurationMilli = transactionData.averageDurationMilli;
-    minDurationMilli = transactionData.minDurationMilli;
-    maxDurationMilli = transactionData.maxDurationMilli;
+    this(WINDOW_SIZE);
   }
 
-  public synchronized TransactionData addPass(double durationMilli) {
-    long previousPassedCount = passCount;
-    passCount++;
-    averageDurationMilli =
-        (averageDurationMilli * previousPassedCount + durationMilli) / passCount;
-    if (durationMilli < minDurationMilli) {
-      minDurationMilli = durationMilli;
-    }
-    if (durationMilli > maxDurationMilli) {
-      maxDurationMilli = durationMilli;
-    }
+  public TransactionData(TransactionData transactionData) {
+    failCount = new AtomicLong(transactionData.failCount.get());
+    descriptiveStatistics =
+        new SynchronizedDescriptiveStatistics(transactionData.descriptiveStatistics);
+  }
+
+  TransactionData(int windowSize) {
+    failCount = new AtomicLong();
+    descriptiveStatistics = new SynchronizedDescriptiveStatistics(WINDOW_SIZE);
+  }
+
+  public TransactionData addPass(double durationMilli) {
+    descriptiveStatistics.addValue(durationMilli);
     return this;
   }
 
-  public synchronized void addFail() {
-    failCount++;
-  }
-  
-  public synchronized double getAverageDurationMilli() {
-    return averageDurationMilli;
+  public void addFail() {
+    failCount.incrementAndGet();
   }
 
-  public synchronized double getMinDurationMilli() {
-    return minDurationMilli;
+  public double getAverageDurationMilli() {
+    return descriptiveStatistics.getMean();
   }
 
-  public synchronized double getMaxDurationMilli() {
-    return maxDurationMilli;
+  public double getMinDurationMilli() {
+    return descriptiveStatistics.getMin();
   }
 
-  public synchronized long getPassCount() {
-    return passCount;
+  public double getMaxDurationMilli() {
+    return descriptiveStatistics.getMax();
   }
-  
-  public synchronized long getFailCount() {
-    return failCount;
+
+  public double get90PercentileEstimate() {
+    return descriptiveStatistics.getPercentile(90);
+  }
+
+  public double getStandardDeviation() {
+    return descriptiveStatistics.getStandardDeviation();
+  }
+
+  public long getPassCount() {
+    return descriptiveStatistics.getN();
+  }
+
+  public long getFailCount() {
+    return failCount.get();
   }
 }
