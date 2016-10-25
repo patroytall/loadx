@@ -19,28 +19,28 @@ public class LongRunningScenario implements Scenario {
   @Override
   public void start() {
     transactionRecorder.start("start");
-    sleep(3);
+    sleep(300);
     transactionRecorder.end();
   }
 
   @Override
   public void run() {
     transactionRecorder.start("run");
-    sleep(5);
+    sleep(500);
     transactionRecorder.end();
   }
 
   @Override
   public void end() {
     transactionRecorder.start("end");
-    sleep(3);
+    sleep(200);
     transactionRecorder.end();
   }
 
-  private void sleep(int delayRangeSeconds) {
-    int delaySeconds = (int) (Math.random() * (delayRangeSeconds + 1));
+  private void sleep(int delayRangeMillis) {
+    int delayMillis = (int) (Math.random() * delayRangeMillis) + 1;
     try {
-      Thread.sleep(delaySeconds * 1000);
+      Thread.sleep(delayMillis);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
