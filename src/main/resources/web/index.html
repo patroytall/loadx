@@ -26,8 +26,8 @@ json = JSON.parse(strJson);
 html = ""
 for (transaction of json.transactions) {
   html += "</br>" + transaction.name + "</br>";
-    for (coordinate of transaction.coordinates) {
-    html += coordinate.x + ":" + coordinate.y + " ";		
+    for (point of transaction.points) {
+    html += point.x + ":" + point.y + " ";
   }
 }
 

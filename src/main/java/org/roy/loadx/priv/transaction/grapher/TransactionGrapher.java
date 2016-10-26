@@ -6,23 +6,18 @@ import org.roy.loadx.priv.Util;
 import org.roy.loadx.priv.transaction.TransactionListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class TransactionGrapher implements TransactionListener {
-  private static class Transaction {
-    public double durationMilli;
-
-    public Transaction(double durationMilli) {
-      this.durationMilli = durationMilli;
-    }
-  }
-
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  private SortedMap<String, List<Transaction>> transactionsMap = new TreeMap<>();
+  private double maxDurationMillis = Double.MIN_VALUE;
+  
+  private SortedMap<String, List<GraphTransaction>> graphTransactionsMap = new TreeMap<>();
 
   @Override
   public void addFail(String transactionName, double relativeStartTimeMillis) {
@@ -31,34 +26,52 @@ public class TransactionGrapher implements TransactionListener {
 
   @Override
   public synchronized void addPass(String transactionName, double relativeStartTimeMillis,
-      double durationMilli) {
-    List<Transaction> transactions = getTransactions(transactionName);
+      double durationMillis) {
+    List<GraphTransaction> transactions = getGraphTransactions(transactionName);
     if (transactions.size() == 10000000) {
       throw new RuntimeException("maximum of 10,000,000 transactions reached");
     }
-    transactions.add(new Transaction(durationMilli));
+    transactions.add(new GraphTransaction(relativeStartTimeMillis, durationMillis));
+    Collections.sort(transactions);
+    if (durationMillis > maxDurationMillis) {
+      maxDurationMillis = durationMillis;
+    }
   }
 
-  private List<Transaction> getTransactions(String transactionName) {
-    List<Transaction> transactions = transactionsMap.get(transactionName);
+  private List<GraphTransaction> getGraphTransactions(String transactionName) {
+    List<GraphTransaction> transactions = graphTransactionsMap.get(transactionName);
     if (transactions == null) {
       transactions = new ArrayList<>();
-      transactionsMap.put(transactionName, transactions);
+      graphTransactionsMap.put(transactionName, transactions);
     }
     return transactions;
   }
 
-  public String getJson() {
+  public synchronized String getJson() {
     GraphInfo graphInfo = new GraphInfo();
-
-    for (Entry<String, List<Transaction>> entry : transactionsMap.entrySet()) {
-      List<Double> durationsMilli = new ArrayList<>();
-      for (Transaction transaction : entry.getValue()) {
-        durationsMilli.add(transaction.durationMilli);
+    if (graphTransactionsMap.size() > 0) {
+      double minRelativeStartTimeMillis = Double.MAX_VALUE;
+      double maxRelativeEndTimeMillis = Double.MIN_VALUE;
+      for (List<GraphTransaction> graphTransactions : graphTransactionsMap.values()) {
+        double relativeStartTimeMillis = graphTransactions.get(0).relativeStartTimeMillis;
+        if (relativeStartTimeMillis < minRelativeStartTimeMillis) {
+          minRelativeStartTimeMillis = relativeStartTimeMillis;
+        }
+        GraphTransaction lastGraphTransaction =
+            graphTransactions.get(graphTransactions.size() - 1);
+        double relativeEndTimeMillis =
+            lastGraphTransaction.relativeStartTimeMillis + lastGraphTransaction.durationMillis;
+        if (relativeEndTimeMillis > maxRelativeEndTimeMillis) {
+          maxRelativeEndTimeMillis = relativeEndTimeMillis;
+        }
       }
-      GraphInfo.TransactionInfo transactionInfo =
-          new GraphInfo.TransactionInfo(entry.getKey(), durationsMilli);
-      graphInfo.transactions.add(transactionInfo);
+
+      for (Entry<String, List<GraphTransaction>> entry : graphTransactionsMap.entrySet()) {
+        GraphInfo.TransactionInfo transactionInfo =
+            new GraphInfo.TransactionInfo(entry.getKey(), entry.getValue(),
+                minRelativeStartTimeMillis, maxRelativeEndTimeMillis, maxDurationMillis);
+        graphInfo.transactions.add(transactionInfo);
+      }
     }
 
     return Util.throwUnchecked(() -> objectMapper.writeValueAsString(graphInfo));
