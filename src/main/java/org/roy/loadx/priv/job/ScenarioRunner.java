@@ -1,12 +1,14 @@
 package org.roy.loadx.priv.job;
 
 import org.roy.loadx.priv.engine.TimeProvider;
-import org.roy.loadx.priv.transaction.TransactionAggregatorImpl;
+import org.roy.loadx.priv.transaction.TransactionListener;
 import org.roy.loadx.priv.transaction.TransactionRecorderImpl;
 import org.roy.loadx.pub.api.ExecutionData;
 import org.roy.loadx.pub.api.JobInitializer;
 import org.roy.loadx.pub.api.Scenario;
 import org.roy.loadx.pub.api.ScenarioClassInitializer;
+
+import java.util.List;
 
 public class ScenarioRunner implements Runnable {
   private final Scenario scenario;
@@ -23,7 +25,7 @@ public class ScenarioRunner implements Runnable {
       long defaultScenarioRunIterationCount, ExecutionData scenarioData,
       ExecutionData scenarioClassData, ExecutionData jobData,
       ScenarioClassInitializer scenarioClassInitializer, JobInitializer jobInitializer,
-      TransactionAggregatorImpl transactionAggregator, TimeProvider timeProvider) {
+      List<TransactionListener> transactionListeners, TimeProvider timeProvider) {
     this.scenario = scenario;
     this.scenarioIterationCount = defaultScenarioIterationCount;
     this.scenarioRunIterationCount = defaultScenarioRunIterationCount;
@@ -32,7 +34,7 @@ public class ScenarioRunner implements Runnable {
     this.jobData = jobData;
     this.scenarioClassInitializer = scenarioClassInitializer;
     this.jobInitializer = jobInitializer;
-    transactionRecorderImpl = new TransactionRecorderImpl(transactionAggregator, timeProvider);
+    transactionRecorderImpl = new TransactionRecorderImpl(transactionListeners, timeProvider);
   }
 
   private void handleStepFailure(String step, Exception e) {

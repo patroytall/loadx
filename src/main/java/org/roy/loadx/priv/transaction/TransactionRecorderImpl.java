@@ -3,17 +3,19 @@ package org.roy.loadx.priv.transaction;
 import org.roy.loadx.priv.engine.TimeProvider;
 import org.roy.loadx.pub.api.TransactionRecorder;
 
-public class TransactionRecorderImpl implements TransactionRecorder {
-  private final TransactionAggregator transactionAggregator;
-  private final TimeProvider timeProvider;
+import java.util.List;
 
+public class TransactionRecorderImpl implements TransactionRecorder {
+  private final TimeProvider timeProvider;
+  private final List<TransactionListener> transactionListeners;
+  
   private long startTimeNano;
   private String name;
   private boolean transactionRunning = false;
 
-  public TransactionRecorderImpl(TransactionAggregator transactionAggregator,
+  public TransactionRecorderImpl(List<TransactionListener> transactionListeners,
       TimeProvider timeProvider) {
-    this.transactionAggregator = transactionAggregator;
+    this.transactionListeners = transactionListeners;
     this.timeProvider = timeProvider;
   }
 
@@ -31,7 +33,9 @@ public class TransactionRecorderImpl implements TransactionRecorder {
     }
     long endTimeNano = timeProvider.nanoTime();
     double durationMilli = (endTimeNano - startTimeNano) / 1e6;
-    transactionAggregator.addPass(name, durationMilli);
+    for (TransactionListener transactionListener : transactionListeners) {
+      transactionListener.addPass(name, durationMilli);
+    }
     endTransaction();
   }
 
@@ -50,7 +54,9 @@ public class TransactionRecorderImpl implements TransactionRecorder {
   
   public void abort() {
     if (transactionRunning) {
-      transactionAggregator.addFail(name);
+      for (TransactionListener transactionListener : transactionListeners) {
+        transactionListener.addFail(name);
+      }
     }
     endTransaction();
   }

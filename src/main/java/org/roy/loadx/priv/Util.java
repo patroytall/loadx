@@ -1,5 +1,6 @@
 package org.roy.loadx.priv;
 
+
 public class Util {
 	
 	public static String findBoundaries(String leftBoundary, String rightBoundary, String str) {
@@ -23,4 +24,20 @@ public class Util {
 			throw new RuntimeException(e);
 		}
 	}
+	
+  public static <T> T throwUnchecked(CheckedExceptionThrower<T> checkedExceptionThrower) {
+    try {
+      return checkedExceptionThrower.get();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void throwUnchecked(CheckedExceptionVoidThrower checkedExceptionVoidThrower) {
+    try {
+      checkedExceptionVoidThrower.process();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
