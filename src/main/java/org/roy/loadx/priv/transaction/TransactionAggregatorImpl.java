@@ -10,12 +10,12 @@ public class TransactionAggregatorImpl implements TransactionAggregator {
 	private final Map<String, TransactionData> transactions = new HashMap<>();
 
 	@Override
-	public synchronized void addPass(String name, double durationMilli) {
+	public synchronized void addPass(String name, double relativeStartTimeMillis, double durationMilli) {
 	  getOrCreateTransactionData(name).addPass(durationMilli);
 	}
 
 	@Override
-	public synchronized void addFail(String name) {
+	public synchronized void addFail(String name, double relativeStartTimeMillis) {
 	  getOrCreateTransactionData(name).addFail();
 	}
 

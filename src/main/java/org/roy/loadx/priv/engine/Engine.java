@@ -2,6 +2,7 @@ package org.roy.loadx.priv.engine;
 
 import com.google.common.collect.FluentIterable;
 
+import org.roy.loadx.priv.engine.time.TimeHandler;
 import org.roy.loadx.priv.job.JobImpl;
 import org.roy.loadx.priv.job.JobScenarioImpl;
 import org.roy.loadx.priv.job.ScenarioRunner;
@@ -128,11 +129,12 @@ public class Engine {
         jobImpl.getScenarioClassInitializers().get(jobScenarioImpl.getScenarioClass());
     List<TransactionListener> transactionListeners =
         Arrays.asList(transactionAggregator, transactionWriter, transactionGrapher);
+    TimeHandler timeHandler = new TimeHandler(configuration.getTimeProvider());
     executorService.execute(new ScenarioRunner(getScenario(jobScenarioImpl), jobImpl
         .getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
         jobScenarioImpl.getScenarioData(), jobImpl.getScenarioClassData(jobScenarioImpl
             .getScenarioClass()), jobImpl.getJobData(), scenarioClassInitializer, jobImpl
-            .getJobInitializer(), transactionListeners, configuration.getTimeProvider()));
+            .getJobInitializer(), transactionListeners, timeHandler));
   }
 
   private void startTransactionPrintRunner() {

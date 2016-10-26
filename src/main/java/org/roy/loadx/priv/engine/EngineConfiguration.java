@@ -1,5 +1,7 @@
 package org.roy.loadx.priv.engine;
 
+import org.roy.loadx.priv.engine.time.TimeProvider;
+import org.roy.loadx.priv.engine.time.TimeProviderImpl;
 import org.roy.loadx.priv.transaction.print.TransactionPrintRunnerThread;
 
 public class EngineConfiguration implements Configuration {
