@@ -20,7 +20,7 @@ public class ArgumentsParser {
     }
   }
   
-  public boolean getWeb() {
+  public boolean getWebServer() {
     return commandLine.hasOption("w");
   }
 }

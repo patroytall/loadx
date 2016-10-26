@@ -1,9 +1,31 @@
 package org.roy.loadx.priv.engine;
 
+import com.google.common.collect.FluentIterable;
+
+import org.roy.loadx.priv.job.JobImpl;
+import org.roy.loadx.priv.job.JobScenarioImpl;
+import org.roy.loadx.priv.job.ScenarioRunner;
+import org.roy.loadx.priv.transaction.TransactionAggregatorImpl;
+import org.roy.loadx.priv.transaction.TransactionListener;
+import org.roy.loadx.priv.transaction.grapher.TransactionGrapher;
+import org.roy.loadx.priv.transaction.print.TransactionPrintRunner;
+import org.roy.loadx.priv.transaction.print.TransactionPrintRunnerThread;
+import org.roy.loadx.priv.transaction.print.TransactionPrinterFactory;
+import org.roy.loadx.priv.transaction.print.TransactionPrinterFactoryImpl;
+import org.roy.loadx.priv.transaction.writer.TransactionWriter;
+import org.roy.loadx.priv.transaction.writer.TransactionWriterStub;
+import org.roy.loadx.pub.api.ExecutionData;
+import org.roy.loadx.pub.api.JobInitializer;
+import org.roy.loadx.pub.api.Scenario;
+import org.roy.loadx.pub.api.ScenarioClassInitializer;
+import org.roy.loadx.pub.invocation.LoadX;
+
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,27 +35,13 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
-import org.roy.loadx.priv.job.JobImpl;
-import org.roy.loadx.priv.job.JobScenarioImpl;
-import org.roy.loadx.priv.job.ScenarioRunner;
-import org.roy.loadx.priv.transaction.TransactionAggregatorImpl;
-import org.roy.loadx.priv.transaction.print.TransactionPrintRunner;
-import org.roy.loadx.priv.transaction.print.TransactionPrintRunnerThread;
-import org.roy.loadx.priv.transaction.print.TransactionPrinterFactory;
-import org.roy.loadx.priv.transaction.print.TransactionPrinterFactoryImpl;
-import org.roy.loadx.pub.api.ExecutionData;
-import org.roy.loadx.pub.api.JobInitializer;
-import org.roy.loadx.pub.api.Scenario;
-import org.roy.loadx.pub.api.ScenarioClassInitializer;
-import org.roy.loadx.pub.invocation.LoadX;
-
-import com.google.common.collect.FluentIterable;
-
 public class Engine {
   private Iterator<JobScenarioImpl> infiniteJobScenarioIterator;
 
   private Configuration configuration;
   private TransactionAggregatorImpl transactionAggregator = new TransactionAggregatorImpl();
+  private TransactionWriter transactionWriter = new TransactionWriterStub();
+  private TransactionGrapher transactionGrapher = new TransactionGrapher();
   private TransactionPrintRunner transactionPrintRunner;
 
   public void run(String[] args) {
@@ -49,8 +57,8 @@ public class Engine {
     ArgumentsParser argumentParser = new ArgumentsParser(args);
 
     WebServer webServer = null;
-    if (argumentParser.getWeb()) {
-      webServer = new WebServer();
+    if (argumentParser.getWebServer() || Properties.getWebserver()) {
+      webServer = new WebServer(transactionGrapher);
     }
     runJavaScript(args[0]);
 
@@ -118,11 +126,13 @@ public class Engine {
       ExecutorService executorService, TransactionAggregatorImpl transactionAggregator) {
     ScenarioClassInitializer scenarioClassInitializer =
         jobImpl.getScenarioClassInitializers().get(jobScenarioImpl.getScenarioClass());
+    List<TransactionListener> transactionListeners =
+        Arrays.asList(transactionAggregator, transactionWriter, transactionGrapher);
     executorService.execute(new ScenarioRunner(getScenario(jobScenarioImpl), jobImpl
         .getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
         jobScenarioImpl.getScenarioData(), jobImpl.getScenarioClassData(jobScenarioImpl
             .getScenarioClass()), jobImpl.getJobData(), scenarioClassInitializer, jobImpl
-            .getJobInitializer(), transactionAggregator, configuration.getTimeProvider()));
+            .getJobInitializer(), transactionListeners, configuration.getTimeProvider()));
   }
 
   private void startTransactionPrintRunner() {
@@ -185,5 +195,7 @@ public class Engine {
     runJobTerminate(jobImpl);
 
     transactionPrintRunner.done();
+
+    transactionWriter.terminate();
   }
 }
