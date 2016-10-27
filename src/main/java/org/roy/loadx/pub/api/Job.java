@@ -22,6 +22,13 @@ public interface Job {
    */
   void setDefaultScenarioThreadCount(int count);
 
+  /**
+   * Minimum amount of time the job will run. start/run/end/scenario iterations will complete before
+   * the time is checked and the scenarios stop. Should generally be used with scenario iteration
+   * count at default value.
+   */
+  void setExecutionTime(long seconds);
+
   void setJobInitializer(JobInitializer jobInitializer);
 
   void setScenarioClassInitializer(Object scenarioClass,
@@ -32,6 +39,11 @@ public interface Job {
   long getDefaultScenarioRunIterationCount();
 
   int getDefaultScenarioThreadCount();
+
+  /**
+   * @return 0 if not set
+   */
+  long getJobExecutionTimeSeconds();
 
   ExecutionData getJobData();
 

@@ -23,6 +23,7 @@ public class JobImpl implements Job {
   private long defaultScenarioRunIterationCount = DEFAULT_SCENARIO_RUN_ITERATION_COUNT;
   private int defaultScenarioThreadCount = DEFAULT_SCENARIO_THREAD_COUNT;
   private JobInitializer jobInitializer;
+  private long jobExecutionTimeSeconds = 0;
 
   @SuppressWarnings("unchecked")
   @Override
@@ -123,5 +124,15 @@ public class JobImpl implements Job {
   
   public Map<Class<Scenario>, ScenarioClassInitializer> getScenarioClassInitializers() {
     return scenarioClassInitializers;
+  }
+
+  @Override
+  public void setExecutionTime(long seconds) {
+    jobExecutionTimeSeconds = seconds;
+  }
+
+  @Override
+  public long getJobExecutionTimeSeconds() {
+    return jobExecutionTimeSeconds;
   }
 }
