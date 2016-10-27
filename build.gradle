@@ -42,6 +42,9 @@ test {
   useJUnit {
     excludeCategories "org.roy.loadx.test.ManualTest"
   }
+  testLogging {
+    events "passed", "skipped", "failed", "standardError"
+  }
 }
 
 if (hasProperty("artifactory_contextUrl")) {

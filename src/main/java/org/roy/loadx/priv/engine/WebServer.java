@@ -16,8 +16,18 @@ public class WebServer {
     
     staticFileLocation("/web");
     port(5555);
-    get("/execution", (req, res) -> this.transactionGrapher.getJson());
+    get("/execution", (req, res) -> getJson());
   }
+  
+  private String getJson() {
+    try {
+      return this.transactionGrapher.getJson();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+  
   
   public void stop() {
     Spark.stop();

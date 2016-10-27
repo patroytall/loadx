@@ -9,18 +9,17 @@ import java.util.Map;
 
 public class TransactionWriterImpl implements TransactionWriter {
   private final Map<String, PrintWriter> printWriters = new HashMap<>();
-  private final long startTime = System.currentTimeMillis() /1000;
 
   @Override
-  public void addFail(String transactionName) {
+  public void addFail(String transactionName, double relativeStartTimeMillis) {
     PrintWriter printWriter = getPrintWriter(transactionName);
-    printWriter.print(" -1");
+    printWriter.print(" " + relativeStartTimeMillis + ":-1");
   }
 
   @Override
-  public void addPass(String transactionName, double durationMilli) {
+  public void addPass(String transactionName, double relativeStartTimeMillis, double durationMillis) {
     PrintWriter printWriter = getPrintWriter(transactionName);
-    printWriter.println((long) (System.currentTimeMillis() / 1000 - startTime) + ", " + durationMilli);
+    printWriter.println(" " + relativeStartTimeMillis + ":" + durationMillis);
     printWriter.flush();
   }
 

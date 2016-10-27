@@ -1,29 +1,31 @@
 package org.roy.loadx.priv.transaction;
 
-import org.roy.loadx.priv.engine.TimeProvider;
+import org.roy.loadx.priv.engine.time.TimeHandler;
 import org.roy.loadx.pub.api.TransactionRecorder;
 
 import java.util.List;
 
 public class TransactionRecorderImpl implements TransactionRecorder {
-  private final TimeProvider timeProvider;
+  private final TimeHandler timeHandler;
   private final List<TransactionListener> transactionListeners;
   
   private long startTimeNano;
   private String name;
   private boolean transactionRunning = false;
+  private double relativeStartTime;
 
   public TransactionRecorderImpl(List<TransactionListener> transactionListeners,
-      TimeProvider timeProvider) {
+      TimeHandler timeHandler) {
     this.transactionListeners = transactionListeners;
-    this.timeProvider = timeProvider;
+    this.timeHandler = timeHandler;
   }
 
   @Override
   public void start(String name) {
     this.name = name;
-    startTimeNano = timeProvider.nanoTime();
+    startTimeNano = timeHandler.getTimeProvider().nanoTime();
     transactionRunning = true;
+    relativeStartTime = TimeHandler.nanoTimeToMillis(timeHandler.getRelativeNanoTime());
   }
 
   @Override
@@ -31,10 +33,10 @@ public class TransactionRecorderImpl implements TransactionRecorder {
     if (!transactionRunning) {
       throw new RuntimeException("transaction not running");
     }
-    long endTimeNano = timeProvider.nanoTime();
-    double durationMilli = (endTimeNano - startTimeNano) / 1e6;
+    long endTimeNano = timeHandler.getTimeProvider().nanoTime();
+    double durationMilli = TimeHandler.nanoTimeToMillis(endTimeNano - startTimeNano);
     for (TransactionListener transactionListener : transactionListeners) {
-      transactionListener.addPass(name, durationMilli);
+      transactionListener.addPass(name, relativeStartTime, durationMilli);
     }
     endTransaction();
   }
@@ -55,7 +57,7 @@ public class TransactionRecorderImpl implements TransactionRecorder {
   public void abort() {
     if (transactionRunning) {
       for (TransactionListener transactionListener : transactionListeners) {
-        transactionListener.addFail(name);
+        transactionListener.addFail(name, relativeStartTime);
       }
     }
     endTransaction();

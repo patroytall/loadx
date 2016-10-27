@@ -2,6 +2,7 @@ package org.roy.loadx.priv.engine;
 
 import com.google.common.collect.FluentIterable;
 
+import org.roy.loadx.priv.engine.time.TimeHandler;
 import org.roy.loadx.priv.job.JobImpl;
 import org.roy.loadx.priv.job.JobScenarioImpl;
 import org.roy.loadx.priv.job.ScenarioRunner;
@@ -23,6 +24,7 @@ import org.roy.loadx.pub.invocation.LoadX;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -36,8 +38,9 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 public class Engine {
-  private Iterator<JobScenarioImpl> infiniteJobScenarioIterator;
+  private final List<ScenarioRunner> scenarioRunners = new ArrayList<>();
 
+  private Iterator<JobScenarioImpl> infiniteJobScenarioIterator;
   private Configuration configuration;
   private TransactionAggregatorImpl transactionAggregator = new TransactionAggregatorImpl();
   private TransactionWriter transactionWriter = new TransactionWriterStub();
@@ -128,11 +131,17 @@ public class Engine {
         jobImpl.getScenarioClassInitializers().get(jobScenarioImpl.getScenarioClass());
     List<TransactionListener> transactionListeners =
         Arrays.asList(transactionAggregator, transactionWriter, transactionGrapher);
-    executorService.execute(new ScenarioRunner(getScenario(jobScenarioImpl), jobImpl
-        .getDefaultScenarioIterationCount(), jobImpl.getDefaultScenarioRunIterationCount(),
-        jobScenarioImpl.getScenarioData(), jobImpl.getScenarioClassData(jobScenarioImpl
-            .getScenarioClass()), jobImpl.getJobData(), scenarioClassInitializer, jobImpl
-            .getJobInitializer(), transactionListeners, configuration.getTimeProvider()));
+    TimeHandler timeHandler = new TimeHandler(configuration.getTimeProvider());
+    boolean waitForExecutionTimeDone = jobImpl.getJobExecutionTimeSeconds() > 0;
+    ScenarioRunner scenarioRunner =
+        new ScenarioRunner(getScenario(jobScenarioImpl),
+            jobImpl.getDefaultScenarioIterationCount(),
+            jobImpl.getDefaultScenarioRunIterationCount(), jobScenarioImpl.getScenarioData(),
+            jobImpl.getScenarioClassData(jobScenarioImpl.getScenarioClass()),
+            jobImpl.getJobData(), scenarioClassInitializer, jobImpl.getJobInitializer(),
+            transactionListeners, timeHandler, waitForExecutionTimeDone);
+    scenarioRunners.add(scenarioRunner);
+    executorService.execute(scenarioRunner);
   }
 
   private void startTransactionPrintRunner() {
@@ -162,6 +171,17 @@ public class Engine {
     }
   }
 
+  private void executionTimeWait(JobImpl jobImpl) {
+    try {
+      Thread.sleep(jobImpl.getJobExecutionTimeSeconds() * 1000);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    for (ScenarioRunner scenarioRunner : scenarioRunners) {
+      scenarioRunner.setExecutionTimeDone();
+    }
+  }
+
   private void runJobScenarios(JobImpl jobImpl) {
     ExecutorService executorService =
         Executors.newFixedThreadPool(jobImpl.getDefaultScenarioThreadCount());
@@ -171,6 +191,8 @@ public class Engine {
       runJobScenario(infiniteJobScenarioIterator.next(), jobImpl, executorService,
           transactionAggregator);
     }
+
+    executionTimeWait(jobImpl);
 
     executorService.shutdown();
 

@@ -5,7 +5,8 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.roy.loadx.priv.engine.TestTimeProvider;
-import org.roy.loadx.priv.engine.TimeProvider;
+import org.roy.loadx.priv.engine.time.TimeHandler;
+import org.roy.loadx.priv.engine.time.TimeProvider;
 
 import java.util.Arrays;
 
@@ -16,7 +17,7 @@ public class TransactionRecorderImplTest {
 
   private final TransactionAggregator transactionAggregator = mock(TransactionAggregator.class);
   private final TransactionRecorderImpl sut = new TransactionRecorderImpl(
-      Arrays.asList(transactionAggregator), testTimeProvider);
+      Arrays.asList(transactionAggregator), new TimeHandler(testTimeProvider));
 
   @Test
   public void startEndForOneNano() {
@@ -25,7 +26,7 @@ public class TransactionRecorderImplTest {
     testTimeProvider.sleep(0, (int) (EXPECTED_DURATION_MILLI * 1e6));
     sut.end();
 
-    verify(transactionAggregator).addPass(TRANSACTION_NAME, EXPECTED_DURATION_MILLI);
+    verify(transactionAggregator).addPass(TRANSACTION_NAME, 0, EXPECTED_DURATION_MILLI);
   }
 
   @Test
@@ -33,6 +34,6 @@ public class TransactionRecorderImplTest {
     sut.start(TRANSACTION_NAME);
     sut.abort();
 
-    verify(transactionAggregator).addFail(TRANSACTION_NAME);
+    verify(transactionAggregator).addFail(TRANSACTION_NAME, 0);
   }
 }

@@ -1,4 +1,4 @@
-package org.roy.loadx.priv.engine;
+package org.roy.loadx.priv.engine.time;
 
 /**
  * Thread safe.

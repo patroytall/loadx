@@ -1,6 +1,6 @@
 package org.roy.loadx.priv.job;
 
-import org.roy.loadx.priv.engine.TimeProvider;
+import org.roy.loadx.priv.engine.time.TimeHandler;
 import org.roy.loadx.priv.transaction.TransactionListener;
 import org.roy.loadx.priv.transaction.TransactionRecorderImpl;
 import org.roy.loadx.pub.api.ExecutionData;
@@ -9,6 +9,7 @@ import org.roy.loadx.pub.api.Scenario;
 import org.roy.loadx.pub.api.ScenarioClassInitializer;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScenarioRunner implements Runnable {
   private final Scenario scenario;
@@ -20,12 +21,15 @@ public class ScenarioRunner implements Runnable {
   private final ScenarioClassInitializer scenarioClassInitializer;
   private final JobInitializer jobInitializer;
   private final TransactionRecorderImpl transactionRecorderImpl;
+  
+  private final AtomicBoolean executionTimeDone;
 
   public ScenarioRunner(Scenario scenario, long defaultScenarioIterationCount,
       long defaultScenarioRunIterationCount, ExecutionData scenarioData,
       ExecutionData scenarioClassData, ExecutionData jobData,
       ScenarioClassInitializer scenarioClassInitializer, JobInitializer jobInitializer,
-      List<TransactionListener> transactionListeners, TimeProvider timeProvider) {
+      List<TransactionListener> transactionListeners, TimeHandler timeHandler,
+      boolean waitForExecutionTimeDone) {
     this.scenario = scenario;
     this.scenarioIterationCount = defaultScenarioIterationCount;
     this.scenarioRunIterationCount = defaultScenarioRunIterationCount;
@@ -34,7 +38,8 @@ public class ScenarioRunner implements Runnable {
     this.jobData = jobData;
     this.scenarioClassInitializer = scenarioClassInitializer;
     this.jobInitializer = jobInitializer;
-    transactionRecorderImpl = new TransactionRecorderImpl(transactionListeners, timeProvider);
+    executionTimeDone = new AtomicBoolean(!waitForExecutionTimeDone);
+    transactionRecorderImpl = new TransactionRecorderImpl(transactionListeners, timeHandler);
   }
 
   private void handleStepFailure(String step, Exception e) {
@@ -76,16 +81,26 @@ public class ScenarioRunner implements Runnable {
   }
 
   private void runScenario() {
-    for (long i = 0; i < scenarioIterationCount; ++i) {
-      if (runStartStep()) {
-        for (long j = 0; j < scenarioRunIterationCount; ++j) {
-          runRunStep();
+    boolean first = true;
+    while (first || !executionTimeDone.get()) {
+      for (long i = 0; i < scenarioIterationCount; ++i) {
+        if (runStartStep()) {
+          for (long j = 0; j < scenarioRunIterationCount; ++j) {
+            runRunStep();
+          }
+          runEndStep();
         }
-        runEndStep();
+      }
+      if (first) {
+        first = false;
       }
     }
   }
 
+  public void setExecutionTimeDone() {
+    executionTimeDone.set(true);
+  }
+  
   @Override
   public void run() {
     scenario.initializeScenarioThread(scenarioData, scenarioClassData, jobData,

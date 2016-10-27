@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LoadX Viewer</title>
+</head>
+
+
+<body>
+	<canvas id="canvas" width="300" height="300"></canvas>
+
+	<div id="output"></div>
+</body>
+
+<script lang="javascript">
+request = new XMLHttpRequest()
+request.open("GET", "execution", false);
+request.send(null);
+
+strJson = request.responseText;
+
+json = JSON.parse(strJson);
+
+html = ""
+for (transaction of json.transactions) {
+  html += "</br>" + transaction.name + "</br>";
+    for (point of transaction.points) {
+    html += point.x + ":" + point.y + " ";
+  }
+}
+
+document.getElementById("output").innerHTML = html;
+
+var ctx = document.getElementById('canvas').getContext("2d");
+
+for (transaction of json.transactions) {
+  ctx.beginPath();
+  first = true
+  for (point of transaction.points) {
+	x = point.x * 3;
+	y = 300 - point.y * 3;
+	if (first) {
+	  ctx.moveTo(x, y);	
+	  first = false;
+	} else {
+	  ctx.lineTo(x, y);		
+	}
+  }
+  if (transaction.name == 'run') {
+	  ctx.strokeStyle="#FF0000"
+  } else {
+	  ctx.strokeStyle="#000000"
+  }
+  ctx.stroke();
+}
+</script>
+
+</html>
