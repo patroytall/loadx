@@ -1,7 +1,9 @@
 package org.roy.loadx.priv.transaction.grapher;
 
 import java.util.ArrayList;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 public class GraphInfo {
   public static class TransactionInfo {
@@ -44,16 +46,22 @@ public class GraphInfo {
         double rangeEnd = i == intervalCount - 1 ? Double.MAX_VALUE : rangeStart + intervalRange;
 
         boolean inRange = true;
+        DoubleStream.Builder durationsBuilders = DoubleStream.builder();
         while (gtIndex < graphTransactions.size() && inRange) {
           GraphTransaction graphTransaction = graphTransactions.get(gtIndex);
           inRange =
               graphTransaction.relativeStartTimeMillis >= rangeStart
                   && graphTransaction.relativeStartTimeMillis < rangeEnd;
           if (inRange) {
-            long y = Math.round(graphTransaction.durationMillis / maxDurationMillis * 100);
-            points.add(new Point(i, y));
+            durationsBuilders.add(graphTransaction.durationMillis);
             gtIndex++;
           }
+        }
+        DoubleSummaryStatistics durationsStatistics =
+            durationsBuilders.build().summaryStatistics();
+        if (durationsStatistics.getCount() > 0) {
+          long y = Math.round(durationsStatistics.getAverage() / maxDurationMillis * 100);
+          points.add(new Point(i, y));
         }
       }
     }

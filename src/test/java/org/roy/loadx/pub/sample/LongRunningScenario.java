@@ -9,6 +9,8 @@ import org.roy.loadx.pub.api.TransactionRecorder;
 public class LongRunningScenario implements Scenario {
   private TransactionRecorder transactionRecorder;
 
+  private int runCount = 0;
+  
   @Override
   public void initializeScenarioThread(ExecutionData scenarioData, ExecutionData scenarioClassData,
       ExecutionData jobData, ScenarioClassInitializer scenarioClassInitializer,
@@ -27,6 +29,7 @@ public class LongRunningScenario implements Scenario {
   public void run() {
     transactionRecorder.start("run");
     sleep(500);
+    sleep(runCount++ % 500);
     transactionRecorder.end();
   }
 
