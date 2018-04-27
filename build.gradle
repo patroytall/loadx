@@ -2,14 +2,9 @@ buildscript {
   repositories {
     jcenter()
   }
-  dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0"
-  }
 }
 
 apply plugin: "java"
-apply plugin: "maven-publish"
-apply plugin: "eclipse"
 
 repositories {
   jcenter()
@@ -44,36 +39,5 @@ test {
   }
   testLogging {
     events "passed", "skipped", "failed", "standardError"
-  }
-}
-
-if (hasProperty("artifactory_contextUrl")) {
-  apply plugin: "com.jfrog.artifactory"
-
-  artifactory {
-    contextUrl = "${artifactory_contextUrl}"
-    publish {
-      repository {
-        repoKey = "${artifactory_repoKey}"
-        username = "${artifactory_username}"
-        password = "${artifactory_password}"
-        maven = true
-      }
-      defaults {
-        publications ('mavenJava')
-      }
-    }
-  }
-
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        from project.components.java
-        artifactId = "loadx"
-        artifact project.sourceJar {
-          classifier "sources"
-        }
-      }
-    }
   }
 }
