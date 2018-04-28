@@ -63,11 +63,27 @@ public class Engine {
     if (argumentParser.getWebServer() || Properties.getWebserver()) {
       webServer = new WebServer(transactionGrapher);
     }
-    runJavaScript(args[0]);
 
-    if (webServer != null) {
-      webServer.stop();
+    if (checkArguments(args)) {
+      runJavaScript(args[0]);
+
+      if (webServer != null) {
+        webServer.stop();
+      }
     }
+  }
+
+  private boolean checkArguments(String[] args) {
+    boolean valid = true;
+    if (args.length == 0 || args.length > 1) {
+      System.out.println("ERROR - invalid number of arguments: " + args.length);
+      valid = false;
+    }
+    if (!valid) {
+      System.out.println("usage: LoadX <JavaScriptJob>");
+      System.out.println("       where JavaScriptJob is a JavaScript file under resources");
+    }
+    return valid;
   }
 
   private void runJavaScript(String resourcePath) {
