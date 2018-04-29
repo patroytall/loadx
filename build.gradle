@@ -5,6 +5,7 @@ buildscript {
 }
 
 apply plugin: "java"
+apply plugin: "maven-publish"
 
 repositories {
   jcenter()
@@ -39,5 +40,14 @@ test {
   }
   testLogging {
     events "passed", "skipped", "failed", "standardError"
+  }
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+      artifact sourceJar
+    }
   }
 }
