@@ -1,36 +1,60 @@
 package org.roy.loadx.priv.transaction;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Thread safe.
- * getPassCount is not fully thread safe after WINDOW_SIZE transactions have been recorded. It can be off by 1.
+ * 90 percentile and standard deviation are only accurate within the WINDOW_SIZE of 16384 entries.
  */
 public class TransactionData {
-  private static final int WINDOW_SIZE = 65536;
+  private static final int WINDOW_SIZE = 16384;
 
-  private final SynchronizedDescriptiveStatistics descriptiveStatistics;
+  private final long windowSize;
+
+  private final DescriptiveStatistics descriptiveStatistics;
   private final AtomicLong failCount;
-  private final AtomicLong passCount;
+  private long passCount;
+  private double min;
+  private double max;
+  private double total;
+
+  TransactionData(int windowSize) {
+    this.windowSize = windowSize;
+    failCount = new AtomicLong();
+    min = Double.NaN;
+    max = Double.NaN;
+    descriptiveStatistics = new SynchronizedDescriptiveStatistics(windowSize);
+  }
 
   public TransactionData() {
-    failCount = new AtomicLong();
-    passCount = new AtomicLong();
-    descriptiveStatistics = new SynchronizedDescriptiveStatistics(WINDOW_SIZE);
+    this(WINDOW_SIZE);
   }
 
   public TransactionData(TransactionData transactionData) {
-    failCount = new AtomicLong(transactionData.failCount.get());
-    passCount = new AtomicLong(transactionData.passCount.get());
-    descriptiveStatistics =
-        new SynchronizedDescriptiveStatistics(transactionData.descriptiveStatistics);
+    synchronized (transactionData) {
+      failCount = new AtomicLong(transactionData.failCount.get());
+      passCount = transactionData.passCount;
+      min = transactionData.min;
+      max = transactionData.max;
+      total = transactionData.total;
+      windowSize = transactionData.windowSize;
+      descriptiveStatistics = new DescriptiveStatistics(transactionData.descriptiveStatistics);
+    }
   }
 
-  public TransactionData addPass(double durationMilli) {
+  public synchronized TransactionData addPass(double durationMilli) {
     descriptiveStatistics.addValue(durationMilli);
-    passCount.incrementAndGet();
+    passCount++;
+    if (Double.isNaN(max) || durationMilli > max) {
+      max = durationMilli;
+    }
+    if (Double.isNaN(min) || durationMilli < min) {
+      min = durationMilli;
+    }
+    total += durationMilli;
     return this;
   }
 
@@ -38,28 +62,28 @@ public class TransactionData {
     failCount.incrementAndGet();
   }
 
-  public double getAverageDurationMilli() {
-    return descriptiveStatistics.getMean();
+  public synchronized double getAverageDurationMilli() {
+    return total / passCount;
   }
 
-  public double getMinDurationMilli() {
-    return descriptiveStatistics.getMin();
+  public synchronized double getMinDurationMilli() {
+    return min;
   }
 
-  public double getMaxDurationMilli() {
-    return descriptiveStatistics.getMax();
+  public synchronized double getMaxDurationMilli() {
+    return max;
   }
 
-  public double get90PercentileEstimate() {
+  public synchronized double get90PercentileEstimate() {
     return descriptiveStatistics.getPercentile(90);
   }
 
-  public double getStandardDeviation() {
+  public synchronized double getStandardDeviation() {
     return descriptiveStatistics.getStandardDeviation();
   }
 
-  public long getPassCount() {
-    return descriptiveStatistics.getN() < WINDOW_SIZE ? descriptiveStatistics.getN() : passCount.longValue();
+  public synchronized long getPassCount() {
+    return passCount;
   }
 
   public long getFailCount() {
